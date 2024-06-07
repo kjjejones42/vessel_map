@@ -21,13 +21,15 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> {
 
-  final channel = WebSocketChannel.connect(Uri.parse("ws://localhost:3000/api"));
+  
+  static const String _port = String.fromEnvironment("PORT");
+
+  final channel = WebSocketChannel.connect(Uri.parse("ws://localhost:$_port/api"));
 
   List<Vessel> parseVessels(String? responseBody) {
     if (responseBody == null) return [];
     final parsed = (jsonDecode(responseBody) as List).cast<Map<String, dynamic>>();
     return parsed.map<Vessel>((json) => Vessel.fromJson(json)).toList(); 
-
   }
 
   @override

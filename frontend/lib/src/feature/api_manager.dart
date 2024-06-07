@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 
 class ApiManager {
-  static final Uri _endpoint = Uri.parse("http://localhost:3000/api");
+  static const String _port = String.fromEnvironment("PORT");
+  static final Uri _endpoint = Uri.parse("http://localhost:$_port/api");
   static final Map<String, String> _headers = {
     'Content-Type': 'application/json'
   };
@@ -13,7 +14,7 @@ class ApiManager {
       Future<Response> Function(Uri,
               {Object? body, Encoding? encoding, Map<String, String>? headers})
           func,
-      String body) async {
+      String body) async {      
     var response = await func(_endpoint, headers: _headers, body: body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return response.body;

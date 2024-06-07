@@ -1,23 +1,26 @@
 services:
   db:
-    restart: unless-stopped
     image: mysql:latest
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=my-db
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - database:/var/lib/mysql
   app:
-    restart: on-failure
     depends_on:
       - db
     ports:
-      - "3000:3000"
-    build: .
+      - "${PORT}:3000"
+    build:
+      context: .
+      args:
+        PORT: ${PORT}
+        APIKEY: ${APIKEY}
+        MYSQL_DATABASE: ${MYSQL_DATABASE}
+        MYSQL_USER: ${MYSQL_USER}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 volumes:
   database:
-  images:
-  djl-cache:
   

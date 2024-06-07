@@ -2,15 +2,15 @@
 import mysql from 'mysql2'
 import { RowDataPacket } from "mysql2"
 
-export const connection = mysql.createConnection({
+export const pool = mysql.createPool({
   host: 'db',
-  user: 'user',
-  password: 'password',
-  database: 'my-db'
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE  
 })
 
 export interface IVessel extends RowDataPacket {
-  id?: number
+  id: number
   name: string
   latitude: number,
   longitude: number,
@@ -25,4 +25,4 @@ const CREATE = `CREATE TABLE IF NOT EXISTS vessels (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );`
 
-connection.query(CREATE)
+pool.query(CREATE)

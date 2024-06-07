@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vessel_map/src/feature/map_model.dart';
+import 'package:flutter/foundation.dart';
+import 'package:universal_html/html.dart' as html;
 
 import 'src/app.dart';
 
-void main() async {
-  // Set up the SettingsController, which will glue user settings to multiple
-  // Flutter Widgets.
-
-  // Load the user's preferred theme while the splash screen is displayed.
-  // This prevents a sudden theme change when the app is first displayed.
-
-  // Run the app and pass in the SettingsController. The app listens to the
-  // SettingsController for changes, then passes it further down to the
-  // SettingsView.
+void init() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => MapModel(),
-      child: const MyApp()
-    ),
-  );
+      ChangeNotifierProvider(create: (_) => MapModel(), child: const MyApp()));
+}
+
+void main() async {
+  
+  if (kIsWeb) {
+    html.document.addEventListener('google-maps-loaded', (event) => init());
+    var apiKey = const String.fromEnvironment('APIKEY');
+    html.document.dispatchEvent(html.CustomEvent("google-maps-api-key-loaded", detail: apiKey));
+  } else {
+    init();
+  }
 }

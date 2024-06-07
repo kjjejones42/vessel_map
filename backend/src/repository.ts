@@ -1,13 +1,13 @@
-import { ResultSetHeader  } from "mysql2"
+import { ResultSetHeader } from "mysql2"
 
-import { IVessel, connection } from "./db"
+import { IVessel, pool } from "./db"
 
 export class UserRepository {
 
-  _subscribers: ((x: IVessel[]) => void)[]  = []
+  _subscribers: ((x: IVessel[]) => void)[] = []
 
   addListener(func: ((x: IVessel[]) => void)) {
-    this._subscribers.push(func)    
+    this._subscribers.push(func)
   }
 
   removeListener(func: ((x: IVessel[]) => void)) {
@@ -16,23 +16,24 @@ export class UserRepository {
       this._subscribers.splice(index)
   }
 
-  async _notifyListeners() {
-    const data = await this.readAll()
-    this._subscribers.forEach(func => func(data))
+  _notifyListeners() {
+    this.findAll().then(data => {
+      this._subscribers.forEach(func => func(data))
+    })
   }
-  
-  readAll(): Promise<IVessel[]> {
+
+  findAll(): Promise<IVessel[]> {
     return new Promise((resolve, reject) => {
-      connection.query<IVessel[]>("SELECT * FROM vessels", (err, res) => {
+      pool.query<IVessel[]>("SELECT * FROM vessels", (err, res) => {
         if (err) reject(err)
         else resolve(res)
       })
     })
   }
 
-  readById(user_id: number): Promise<IVessel | undefined> {
+  findById(user_id: number): Promise<IVessel | undefined> {
     return new Promise((resolve, reject) => {
-      connection.query<IVessel[]>(
+      pool.query<IVessel[]>(
         "SELECT * FROM vessels WHERE id = ?",
         [user_id],
         (err, res) => {
@@ -45,13 +46,13 @@ export class UserRepository {
 
   create(vessel: IVessel): Promise<IVessel> {
     return new Promise((resolve, reject) => {
-      connection.query<ResultSetHeader >(
-        "INSERT INTO vessels (name, latitude, longitude, updated_at) VALUES(?,?,?,?)",
-        [vessel.name, vessel.latitude, vessel.longitude, new Date()],
+      pool.query<ResultSetHeader>(
+        "INSERT INTO vessels (name, latitude, longitude) VALUES(?,?,?)",
+        [vessel.name, vessel.latitude, vessel.longitude],
         (err, res) => {
           if (err) reject(err)
-          else 
-            this.readById(res.insertId)
+          else
+            this.findById(res.insertId)
               .then(user => resolve(user!))
               .then(() => this._notifyListeners())
               .catch(reject)
@@ -62,13 +63,13 @@ export class UserRepository {
 
   update(vessel: IVessel): Promise<IVessel | undefined> {
     return new Promise((resolve, reject) => {
-      connection.query<ResultSetHeader >(
-        "UPDATE vessels SET name = ?, latitude = ?, longitude = ?, updated_at = ? WHERE id = ?",
-        [vessel.name, vessel.latitude, vessel.longitude, new Date(), vessel.id],
-        (err, res) => {
+      pool.query<ResultSetHeader>(
+        "UPDATE vessels SET name = ?, latitude = ?, longitude = ? WHERE id = ?",
+        [vessel.name, vessel.latitude, vessel.longitude, vessel.id],
+        (err, _) => {
           if (err) reject(err)
           else
-            this.readById(vessel.id!)
+            this.findById(vessel.id)
               .then(resolve)
               .then(() => this._notifyListeners())
               .catch(reject)
@@ -79,7 +80,7 @@ export class UserRepository {
 
   remove(user_id: number): Promise<number> {
     return new Promise((resolve, reject) => {
-      connection.query<ResultSetHeader >(
+      pool.query<ResultSetHeader>(
         "DELETE FROM vessels WHERE id = ?",
         [user_id],
         (err, res) => {

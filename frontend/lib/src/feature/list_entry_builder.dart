@@ -41,7 +41,7 @@ class ListEntryBuilder {
 
   void onSubmitEditForm(Map<String, dynamic> payload, BuildContext? context) async {
     await ApiManager().update(payload);
-    if (context!= null && context.mounted) {
+    if (context != null && context.mounted) {
       Navigator.pop(context, 'Submitted');
     }
   }
