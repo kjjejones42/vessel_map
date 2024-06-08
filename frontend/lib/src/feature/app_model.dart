@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vessel_map/src/feature/vessel.dart';
@@ -32,7 +34,7 @@ class AppModel extends ChangeNotifier {
 
   List<Vessel> _items = [];
 
-  List<Vessel> get items => _items;
+  UnmodifiableListView<Vessel> get items => UnmodifiableListView(_items);
 
   set items(List<Vessel> items) {
     if (!listEquals(items, _items)) {
