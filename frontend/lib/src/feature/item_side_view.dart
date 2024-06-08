@@ -81,7 +81,7 @@ class ItemSideViewState extends State<ItemSideView> {
     }
   }
 
-  void _addNew() {
+  void addNew() {
     final formKey = GlobalKey<FormState>();
     showDialog(
       context: context,
@@ -102,6 +102,53 @@ class ItemSideViewState extends State<ItemSideView> {
     );
   }
 
+  Widget searchTextChip(List<Vessel> items) => Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: InputChip(
+        label: Text(localizations!.searchText(_searchTerm)),
+        deleteButtonTooltipMessage: localizations!.clear,
+        onDeleted: () => _clearFilter(items),
+      ));
+
+  Widget menuButton() => Padding(
+      padding: const EdgeInsets.all(8),
+      child: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.menu)));
+
+  Widget searchTextBar(List<Vessel> items) => TextField(
+        controller: _textController,
+        onChanged: (value) => setState(() => _textValue = value),
+        onSubmitted: (value) => _setFilter(items),
+        decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText: localizations!.search,
+            suffixIcon: IconButton(
+              tooltip: localizations!.search,
+              icon: const Icon(Icons.search),
+              onPressed: () => _setFilter(items),
+            )),
+      );
+
+  Widget addButton() => Padding(
+      padding: const EdgeInsets.all(8),
+      child: IconButton(
+          onPressed: addNew,
+          icon: const Icon(Icons.add),
+          tooltip: localizations!.addTooltip));
+
+  Widget sortMenuButton(List<Vessel> items) => Padding(
+      padding: const EdgeInsets.all(8),
+      child: PopupMenuButton(
+          onSelected: (key) => _sortItems(items, key as VesselSortKeys),
+          tooltip: localizations!.sortTooltip,
+          icon: const Icon(Icons.sort),
+          itemBuilder: (context) =>
+              VesselSortKeys.values.map<PopupMenuItem>((key) {
+                final name = toBeginningOfSentenceCase(key.name);
+                return PopupMenuItem(value: key, child: Text(name));
+              }).toList()));
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AppModel>(
@@ -109,23 +156,6 @@ class ItemSideViewState extends State<ItemSideView> {
       final items = model.items;
       _filteredItems = _filterItems(items);
       localizations = AppLocalizations.of(context);
-      var searchText = Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: const BorderRadius.all((Radius.circular((20))))),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                  overflow: TextOverflow.ellipsis,
-                  localizations!.searchText(_searchTerm)),
-              IconButton(
-                  tooltip: localizations!.clear,
-                  onPressed: () => _clearFilter(items),
-                  icon: const Icon(Icons.clear))
-            ],
-          ));
       return Column(children: [
         Flexible(
             flex: 0,
@@ -135,49 +165,14 @@ class ItemSideViewState extends State<ItemSideView> {
                 child: Row(
                   children: [
                     widget.showMenuButton
-                        ? Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: IconButton(
-                                onPressed: () => Navigator.pop(context),
-                                icon: const Icon(Icons.menu)))
+                        ? menuButton()
                         : const SizedBox.shrink(),
-                    Expanded(
-                        child: TextField(
-                      controller: _textController,
-                      onChanged: (value) => setState(() => _textValue = value),
-                      onSubmitted: (value) => _setFilter(items),
-                      decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          labelText: localizations!.search,
-                          suffixIcon: IconButton(
-                            tooltip: localizations!.search,
-                            icon: const Icon(Icons.search),
-                            onPressed: () => _setFilter(items),
-                          )),
-                    )),
-                    Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: IconButton(
-                            onPressed: _addNew,
-                            icon: const Icon(Icons.add),
-                            tooltip: localizations!.addTooltip)),
-                    Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: PopupMenuButton(
-                            onSelected: (key) =>
-                                _sortItems(items, key as VesselSortKeys),
-                            tooltip: localizations!.sortTooltip,
-                            icon: const Icon(Icons.sort),
-                            itemBuilder: (context) =>
-                                VesselSortKeys.values.map<PopupMenuItem>((key) {
-                                  final name =
-                                      toBeginningOfSentenceCase(key.name);
-                                  return PopupMenuItem(
-                                      value: key, child: Text(name));
-                                }).toList()))
+                    Expanded(child: searchTextBar(items)),
+                    addButton(),
+                    sortMenuButton(items)
                   ],
                 ))),
-        (_searchTerm != '') ? searchText : const SizedBox.shrink(),
+        (_searchTerm != '') ? searchTextChip(items) : const SizedBox.shrink(),
         Expanded(
             child: ListView.builder(
                 restorationId: 'sampleItemListView',

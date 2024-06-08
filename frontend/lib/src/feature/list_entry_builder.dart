@@ -77,18 +77,25 @@ class ListEntryBuilder {
             ));
   }
 
+  String circleAvatarText(String name) {
+    return switch (name.length) {
+      0 => '',
+      1 => name[0].toUpperCase(),
+      _ => name[0].toUpperCase() + name[1].toLowerCase()
+    };
+  }
+
   Widget? itemBuilder(BuildContext context, int index) {
     return Consumer<AppModel>(builder: (context, model, child) {
       localizations = AppLocalizations.of(context);
       final item = items[index];
       final lastUpdated = DateFormat.yMd(locale).add_jms().format(item.updated);
-      final shortText = item.name[0].toUpperCase() + item.name[1].toLowerCase();
       return ListTile(
-          key: Key(item.name),
+          key: Key(item.hashCode.toString()),
           title: Text(item.name),
           subtitle:
               Text('Updated: $lastUpdated\nLocation: ${item.locationText}'),
-          leading: CircleAvatar(child: Text(shortText)),
+          leading: CircleAvatar(child: Text(circleAvatarText(item.name))),
           trailing: Row(mainAxisSize: MainAxisSize.min, children: [
             IconButton(
                 tooltip: localizations!.edit,

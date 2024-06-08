@@ -7,16 +7,15 @@ class ApiRequestManager {
     'Content-Type': 'application/json'
   };
 
+  static final int port = Uri.base.port;
+
   static final Uri _endpoint = Uri(
-      scheme: Uri.base.scheme,
-      host: Uri.base.host,
-      port: Uri.base.port,
-      path: '/api');
+      scheme: Uri.base.scheme, host: Uri.base.host, port: port, path: '/api');
 
   static final String wsUri = Uri(
           scheme: (Uri.base.scheme == 'https') ? 'wss' : 'ws',
           host: Uri.base.host,
-          port: Uri.base.port,
+          port: port,
           path: '/api')
       .toString();
 
