@@ -8,7 +8,6 @@ import 'package:vessel_map/src/feature/list_entry_builder.dart';
 import 'package:vessel_map/src/feature/app_model.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class ItemSideView extends StatefulWidget {
   final bool showMenuButton;
@@ -16,9 +15,7 @@ class ItemSideView extends StatefulWidget {
   const ItemSideView({super.key, this.showMenuButton = false});
 
   @override
-  State<StatefulWidget> createState() {
-    return ItemSideViewState();
-  }
+  State<StatefulWidget> createState() => ItemSideViewState();
 }
 
 enum VesselSortKeys {
@@ -129,7 +126,6 @@ class ItemSideViewState extends State<ItemSideView> {
                   icon: const Icon(Icons.clear))
             ],
           ));
-      final color = Theme.of(context).colorScheme.primary;
       return Column(children: [
         Flexible(
             flex: 0,
@@ -183,13 +179,12 @@ class ItemSideViewState extends State<ItemSideView> {
                 ))),
         (_searchTerm != '') ? searchText : const SizedBox.shrink(),
         Expanded(
-            child: model.isConnected
-                ? ListView.builder(
-                    restorationId: 'sampleItemListView',
-                    itemCount: _filteredItems.length,
-                    padding: EdgeInsets.zero,
-                    itemBuilder: ListEntryBuilder(items: _filteredItems).itemBuilder)
-                : LoadingAnimationWidget.beat(color: color, size: 32))
+            child: ListView.builder(
+                restorationId: 'sampleItemListView',
+                itemCount: _filteredItems.length,
+                padding: EdgeInsets.zero,
+                itemBuilder:
+                    ListEntryBuilder(items: _filteredItems).itemBuilder))
       ]);
     });
   }

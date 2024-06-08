@@ -3,6 +3,7 @@
   "@appTitle": {
     "description": "The title of the application"
   },
+  "disconnectedMessage": "Can't connect at the moment. Trying again...",
   "ok": "OK",
   "cancel": "Cancel",
   "clear": "Clear",

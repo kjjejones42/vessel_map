@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
 import 'package:vessel_map/src/feature/app_model.dart';
@@ -9,7 +10,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class ItemMainView extends StatelessWidget {
   const ItemMainView({super.key});
 
-
   Widget _portraitView(AppBar appBar, BuildContext context) {
     var minWidth = MediaQuery.of(context).size.width * .75;
     return Scaffold(
@@ -18,8 +18,8 @@ class ItemMainView extends StatelessWidget {
         drawer: PointerInterceptor(
             child: ConstrainedBox(
                 constraints: BoxConstraints(minWidth: minWidth),
-                child: const Drawer(
-                    child: ItemSideView(showMenuButton: true)))));
+                child:
+                    const Drawer(child: ItemSideView(showMenuButton: true)))));
   }
 
   Widget _landscapeView(AppBar appBar) {
@@ -31,6 +31,18 @@ class ItemMainView extends StatelessWidget {
               child: const ItemSideView()),
           const Expanded(child: MapView())
         ]));
+  }
+
+  Widget _loadingView(BuildContext context, AppBar appBar) {
+    final color = Theme.of(context).colorScheme.primary;
+    final text = AppLocalizations.of(context)!.disconnectedMessage;
+    return Scaffold(
+        appBar: appBar,
+        body: Center(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+          LoadingAnimationWidget.beat(color: color, size: 32),
+          Padding(padding: const EdgeInsets.all(16), child: Text(text)),
+        ])));
   }
 
   AppBar _appBar(BuildContext context, bool isConnected) {
@@ -60,6 +72,9 @@ class ItemMainView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppModel>(builder: (context, model, child) {
       final appBar = _appBar(context, model.isConnected);
+      if (!model.isConnected) {
+        return _loadingView(context, appBar);
+      }
       return _shouldShowDrawer(context)
           ? _portraitView(appBar, context)
           : _landscapeView(appBar);
