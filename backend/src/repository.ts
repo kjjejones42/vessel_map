@@ -4,21 +4,15 @@ import { IVessel, pool } from "./db"
 
 export class UserRepository {
 
-  _subscribers: ((x: IVessel[]) => void)[] = []
+  _listeners: ((x: IVessel[]) => void)[] = []
 
   addListener(func: ((x: IVessel[]) => void)) {
-    this._subscribers.push(func)
-  }
-
-  removeListener(func: ((x: IVessel[]) => void)) {
-    const index = this._subscribers.indexOf(func);
-    if (index != -1)
-      this._subscribers.splice(index)
+    this._listeners.push(func)
   }
 
   _notifyListeners() {
     this.findAll().then(data => {
-      this._subscribers.forEach(func => func(data))
+      this._listeners.forEach(func => func(data))
     })
   }
 

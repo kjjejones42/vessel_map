@@ -9,15 +9,15 @@ const repo = new UserRepository()
 
 const PORT = 3000
 
-const app = expressWs(express()).app
+const appWs = expressWs(express());
+const app = appWs.app;
 
 app.ws('/api', (ws, _) => {
-  const listener = function (vessels: IVessel[]) {
-    ws.send(JSON.stringify(vessels));
-  }
-  repo.addListener(listener);
-  repo.findAll().then(data => listener(data))
-  ws.on('close', () => repo.removeListener(listener));
+  repo.findAll().then(data => ws.send(JSON.stringify(data)))
+})
+
+repo.addListener(vessels => {
+  appWs.getWss().clients.forEach(client => client.send(JSON.stringify(vessels)))
 })
 
 app.use(cors())
