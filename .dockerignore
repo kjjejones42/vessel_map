@@ -1,0 +1,134 @@
+# flyctl launch added from backend\.gitignore
+backend\**\.vscode
+backend\**\node_modules
+backend\**\build
+backend\**\package-lock.json
+
+# flyctl launch added from frontend\.gitignore
+# Miscellaneous
+frontend\**\*.class
+frontend\**\*.log
+frontend\**\*.pyc
+frontend\**\*.swp
+frontend\**\.DS_Store
+frontend\**\.atom
+frontend\**\.buildlog
+frontend\**\.history
+frontend\**\.svn
+frontend\**\migrate_working_dir
+
+frontend\**\.vscode
+# IntelliJ related
+frontend\**\*.iml
+frontend\**\*.ipr
+frontend\**\*.iws
+frontend\**\.idea
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+frontend\**\**\doc\api
+frontend\**\**\ios\Flutter\.last_build_id
+frontend\**\.dart_tool
+frontend\**\.flutter-plugins
+frontend\**\.flutter-plugins-dependencies
+frontend\**\.pub-cache
+frontend\**\.pub
+frontend\build
+
+# Symbolication related
+frontend\**\app.*.symbols
+
+# Obfuscation related
+frontend\**\app.*.map.json
+
+# Android Studio will place build artifacts here
+frontend\android\app\debug
+frontend\android\app\profile
+frontend\android\app\release
+
+# flyctl launch added from frontend\android\.gitignore
+frontend\android\**\gradle-wrapper.jar
+frontend\android\.gradle
+frontend\android\captures
+frontend\android\gradlew
+frontend\android\gradlew.bat
+frontend\android\local.properties
+frontend\android\**\GeneratedPluginRegistrant.java
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/docs/deployment/android#reference-the-keystore-from-the-app
+frontend\android\**\key.properties
+frontend\android\**\**\*.keystore
+frontend\android\**\**\*.jks
+
+# flyctl launch added from frontend\ios\.gitignore
+frontend\ios\**\**\dgph
+frontend\ios\**\*.mode1v3
+frontend\ios\**\*.mode2v3
+frontend\ios\**\*.moved-aside
+frontend\ios\**\*.pbxuser
+frontend\ios\**\*.perspectivev3
+frontend\ios\**\**\*sync
+frontend\ios\**\.sconsign.dblite
+frontend\ios\**\.tags*
+frontend\ios\**\**\.vagrant
+frontend\ios\**\**\DerivedData
+frontend\ios\**\Icon?
+frontend\ios\**\**\Pods
+frontend\ios\**\**\.symlinks
+frontend\ios\**\profile
+frontend\ios\**\xcuserdata
+frontend\ios\**\**\.generated
+frontend\ios\**\Flutter\App.framework
+frontend\ios\**\Flutter\Flutter.framework
+frontend\ios\**\Flutter\Flutter.podspec
+frontend\ios\**\Flutter\Generated.xcconfig
+frontend\ios\**\Flutter\ephemeral
+frontend\ios\**\Flutter\app.flx
+frontend\ios\**\Flutter\app.zip
+frontend\ios\**\Flutter\flutter_assets
+frontend\ios\**\Flutter\flutter_export_environment.sh
+frontend\ios\**\ServiceDefinitions.json
+frontend\ios\**\Runner\GeneratedPluginRegistrant.*
+
+# Exceptions to above rules.
+!frontend\ios\**\default.mode1v3
+!frontend\ios\**\default.mode2v3
+!frontend\ios\**\default.pbxuser
+!frontend\ios\**\default.perspectivev3
+
+# flyctl launch added from frontend\linux\.gitignore
+frontend\linux\**\flutter\ephemeral
+
+# flyctl launch added from frontend\macos\.gitignore
+# Flutter-related
+frontend\macos\**\**\Flutter\ephemeral
+frontend\macos\**\**\Pods
+
+# Xcode-related
+frontend\macos\**\**\dgph
+frontend\macos\**\**\xcuserdata
+
+# flyctl launch added from frontend\windows\.gitignore
+frontend\windows\**\flutter\ephemeral
+
+# Visual Studio user-specific files.
+frontend\windows\**\*.suo
+frontend\windows\**\*.user
+frontend\windows\**\*.userosscache
+frontend\windows\**\*.sln.docstates
+
+# Visual Studio build-related files.
+frontend\windows\**\x64
+frontend\windows\**\x86
+
+# Visual Studio cache files
+# files ending in .cache can be ignored
+frontend\windows\**\*.[Cc]ache
+# but keep track of directories ending in .cache
+!frontend\windows\**\*.[Cc]ache
+fly.toml

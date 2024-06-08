@@ -7,12 +7,18 @@ class ApiRequestManager {
     'Content-Type': 'application/json'
   };
 
-  static const int _port = int.fromEnvironment('PORT', defaultValue: 3000);
+  static final Uri _endpoint = Uri(
+      scheme: Uri.base.scheme,
+      host: Uri.base.host,
+      port: Uri.base.port,
+      path: '/api');
 
-  static final Uri _endpoint = Uri(scheme: 'http', host: Uri.base.host, port: _port, path: '/api');
-
-  static final String wsUri = Uri(scheme: 'ws', host: Uri.base.host, port: _port, path: '/api').toString();
-
+  static final String wsUri = Uri(
+          scheme: (Uri.base.scheme == 'https') ? 'wss' : 'ws',
+          host: Uri.base.host,
+          port: Uri.base.port,
+          path: '/api')
+      .toString();
 
   Future<String?> _call(
       Future<http.Response> Function(Uri,
