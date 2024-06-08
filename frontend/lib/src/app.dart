@@ -33,8 +33,8 @@ class MyAppState extends State<MyApp> {
       brightness: brightness,
       colorScheme: colorScheme,
       appBarTheme: AppBarTheme(
-          foregroundColor: colorScheme.onPrimary,
-          backgroundColor: colorScheme.primary) 
+          foregroundColor: colorScheme.onPrimaryContainer,
+          backgroundColor: colorScheme.primaryContainer) 
     );
   }
 
