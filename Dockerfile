@@ -8,13 +8,7 @@ RUN flutter build web --dart-define PORT=${PORT} --dart-define APIKEY=${APIKEY}
 
 FROM node:alpine
 WORKDIR /app
-COPY ./backend ./
-ARG MYSQL_DATABASE
-ARG MYSQL_USER
-ARG MYSQL_PASSWORD
-ENV MYSQL_DATABASE=${MYSQL_DATABASE}
-ENV MYSQL_USER=${MYSQL_USER}
-ENV MYSQL_PASSWORD=${MYSQL_PASSWORD}
+COPY ./backend .
 COPY --from=Frontend /home/flutter/build/web public
 RUN npm install
 RUN npm run build

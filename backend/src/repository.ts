@@ -1,6 +1,5 @@
-import { ResultSetHeader } from "mysql2"
-
-import { IVessel, pool } from "./db"
+import { RunResult } from "sqlite3"
+import { IVessel, db } from "./db"
 
 export class UserRepository {
 
@@ -18,21 +17,21 @@ export class UserRepository {
 
   findAll(): Promise<IVessel[]> {
     return new Promise((resolve, reject) => {
-      pool.query<IVessel[]>("SELECT * FROM vessels", (err, res) => {
+      db.all("SELECT * FROM vessels", (err, res) => {
         if (err) reject(err)
-        else resolve(res)
+        else resolve(res as IVessel[])
       })
     })
   }
 
   findById(userId: number): Promise<IVessel | undefined> {
     return new Promise((resolve, reject) => {
-      pool.query<IVessel[]>(
+      db.get(
         "SELECT * FROM vessels WHERE id = ?",
         [userId],
         (err, res) => {
           if (err) reject(err)
-          else resolve(res?.[0])
+          else resolve(res as IVessel)
         }
       )
     })
@@ -40,16 +39,18 @@ export class UserRepository {
 
   create(vessel: IVessel): Promise<IVessel> {
     return new Promise((resolve, reject) => {
-      pool.query<ResultSetHeader>(
-        "INSERT INTO vessels (name, latitude, longitude) VALUES(?,?,?)",
-        [vessel.name, vessel.latitude, vessel.longitude],
-        (err, res) => {
+      const outerThis = this;
+      db.run(
+        "INSERT INTO vessels (id, name, latitude, longitude, updated_at) VALUES(?,?,?,?,?)",
+        [null, vessel.name, vessel.latitude, vessel.longitude, new Date().toISOString()],
+        function (err) {
           if (err) reject(err)
-          else
-            this.findById(res.insertId)
+          else {
+            outerThis.findById(this.lastID)
               .then(user => resolve(user!))
-              .then(() => this._notifyListeners())
+              .then(() => outerThis._notifyListeners())
               .catch(reject)
+          }
         }
       )
     })
@@ -57,16 +58,18 @@ export class UserRepository {
 
   update(vessel: IVessel): Promise<IVessel | undefined> {
     return new Promise((resolve, reject) => {
-      pool.query<ResultSetHeader>(
+      const outerThis = this;
+      db.run(
         "UPDATE vessels SET name = ?, latitude = ?, longitude = ?, updated_at = ? WHERE id = ?",
-        [vessel.name, vessel.latitude, vessel.longitude, new Date(), vessel.id],
-        (err) => {
+        [vessel.name, vessel.latitude, vessel.longitude, new Date().toISOString(), vessel.id],
+        function (err) {
           if (err) reject(err)
-          else
-            this.findById(vessel.id)
+          else {
+            outerThis.findById(this.lastID)
               .then(resolve)
-              .then(() => this._notifyListeners())
+              .then(() => outerThis._notifyListeners())
               .catch(reject)
+          }
         }
       )
     })
@@ -74,14 +77,15 @@ export class UserRepository {
 
   remove(userId: number): Promise<number> {
     return new Promise((resolve, reject) => {
-      pool.query<ResultSetHeader>(
+      const outerThis = this;
+      db.all(
         "DELETE FROM vessels WHERE id = ?",
         [userId],
-        (err, res) => {
+        function (err, res) {
           if (err) reject(err)
           else {
-            resolve(res.affectedRows)
-            this._notifyListeners()
+            resolve(res.length)
+            outerThis._notifyListeners()
           }
         }
       )
