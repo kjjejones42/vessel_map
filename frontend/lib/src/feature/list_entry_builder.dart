@@ -14,6 +14,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class ListEntryBuilder {
   final List<Vessel> items;
   AppLocalizations? localizations;
+  final String locale = PlatformDispatcher.instance.locale.toString();
 
   ListEntryBuilder({required this.items});
 
@@ -80,17 +81,14 @@ class ListEntryBuilder {
     return Consumer<AppModel>(builder: (context, model, child) {
       localizations = AppLocalizations.of(context);
       final item = items[index];
-      final locale = PlatformDispatcher.instance.locale.toString();
-
       final lastUpdated = DateFormat.yMd(locale).add_jms().format(item.updated);
+      final shortText = item.name[0].toUpperCase() + item.name[1].toLowerCase();
       return ListTile(
           key: Key(item.name),
           title: Text(item.name),
           subtitle:
               Text('Updated: $lastUpdated\nLocation: ${item.locationText}'),
-          leading: const CircleAvatar(
-            foregroundImage: AssetImage('assets/images/boat.png'),
-          ),
+          leading: CircleAvatar(child: Text(shortText)),
           trailing: Row(mainAxisSize: MainAxisSize.min, children: [
             IconButton(
                 tooltip: localizations!.edit,
