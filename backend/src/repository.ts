@@ -25,11 +25,11 @@ export class UserRepository {
     })
   }
 
-  findById(user_id: number): Promise<IVessel | undefined> {
+  findById(userId: number): Promise<IVessel | undefined> {
     return new Promise((resolve, reject) => {
       pool.query<IVessel[]>(
         "SELECT * FROM vessels WHERE id = ?",
-        [user_id],
+        [userId],
         (err, res) => {
           if (err) reject(err)
           else resolve(res?.[0])
@@ -60,7 +60,7 @@ export class UserRepository {
       pool.query<ResultSetHeader>(
         "UPDATE vessels SET name = ?, latitude = ?, longitude = ?, updated_at = ? WHERE id = ?",
         [vessel.name, vessel.latitude, vessel.longitude, new Date(), vessel.id],
-        (err, _) => {
+        (err) => {
           if (err) reject(err)
           else
             this.findById(vessel.id)
@@ -72,11 +72,11 @@ export class UserRepository {
     })
   }
 
-  remove(user_id: number): Promise<number> {
+  remove(userId: number): Promise<number> {
     return new Promise((resolve, reject) => {
       pool.query<ResultSetHeader>(
         "DELETE FROM vessels WHERE id = ?",
-        [user_id],
+        [userId],
         (err, res) => {
           if (err) reject(err)
           else {
