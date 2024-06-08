@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
-import 'package:vessel_map/src/feature/item.dart';
+import 'package:vessel_map/src/feature/vessel.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ItemDetailsForm extends StatefulWidget {
   final Vessel? item;
@@ -21,40 +22,41 @@ class ItemDetailsFormState extends State<ItemDetailsForm> {
   final _latitudeController = TextEditingController();
   final _longitudeController = TextEditingController();
 
+  AppLocalizations? localizations;
+
   String? _doubleValidator(String? value, String? Function(double) validator) {
-    if (value == null || value.isEmpty) return "Field required.";
+    if (value == null || value.isEmpty) return localizations!.fieldRequired;
     double? num = double.tryParse(value);
-    if (num == null) return "Please enter a valid number";
+    if (num == null) return localizations!.doubleValidation;
     return validator(num);
   }
 
   String? _latitudeValidator(double value) {
     if (value < -90 || value > 90) {
-      return "Please enter valid latitude";
+      return localizations!.latitudeValidation;
     }
     return null;
   }
 
   String? _longitudeValidator(double value) {
     if (value < -180 || value > 180) {
-      return "Please enter valid longitude";
+      return localizations!.longitudeValidation;
     }
     return null;
-
   }
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       var payload = {
-        "name": _nameController.text,
-        "latitude": double.parse(_latitudeController.text),
-        "longitude": double.parse(_longitudeController.text),
+        'name': _nameController.text,
+        'latitude': double.parse(_latitudeController.text),
+        'longitude': double.parse(_longitudeController.text),
       };
       var item = widget.item;
       if (item != null) {
-        payload["id"] = item.id;
+        payload['id'] = item.id;
       }
-      
+
       widget.onSubmit!(payload, _formKey.currentContext);
     }
   }
@@ -73,6 +75,7 @@ class ItemDetailsFormState extends State<ItemDetailsForm> {
 
   @override
   Widget build(BuildContext context) {
+    localizations = AppLocalizations.of(context);
     return PointerInterceptor(
         child: Form(
             key: _formKey,
@@ -85,29 +88,31 @@ class ItemDetailsFormState extends State<ItemDetailsForm> {
                       onSaved: (_) => _submitForm(),
                       controller: _nameController,
                       validator: (value) => (value == null || value.isEmpty)
-                          ? "Field required"
+                          ? localizations!.fieldRequired
                           : null,
-                      decoration: const InputDecoration(
-                          label: Text("Vessel Name"),
-                          border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                          label: Text(localizations!.formNameTooltip),
+                          border: const OutlineInputBorder()),
                     )),
                 Padding(
                     padding: const EdgeInsets.all(8),
                     child: TextFormField(
                       controller: _latitudeController,
-                      validator: (value) =>_doubleValidator(value, _latitudeValidator),
-                      decoration: const InputDecoration(
-                          label: Text("Latitude"),
-                          border: OutlineInputBorder()),
+                      validator: (value) =>
+                          _doubleValidator(value, _latitudeValidator),
+                      decoration: InputDecoration(
+                          label: Text(localizations!.formLatitudeTooltip),
+                          border: const OutlineInputBorder()),
                     )),
                 Padding(
                     padding: const EdgeInsets.all(8),
                     child: TextFormField(
                       controller: _longitudeController,
-                      validator: (value) =>_doubleValidator(value, _longitudeValidator),
-                      decoration: const InputDecoration(
-                          label: Text("Longitude"),
-                          border: OutlineInputBorder()),
+                      validator: (value) =>
+                          _doubleValidator(value, _longitudeValidator),
+                      decoration: InputDecoration(
+                          label: Text(localizations!.formLongitudeTooltip),
+                          border: const OutlineInputBorder()),
                     )),
               ],
             )));

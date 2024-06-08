@@ -2,5 +2,42 @@
   "appTitle": "Vessel Map",
   "@appTitle": {
     "description": "The title of the application"
-  }
+  },
+  "ok": "OK",
+  "cancel": "Cancel",
+  "clear": "Clear",
+  "submit": "Submit",
+  "search": "Search",
+  "addTooltip": "Add New",
+  "sortTooltip": "Sort By",
+  "delete": "Delete",
+  "edit": "Edit",
+  "warningTitle": "Warning",
+  "editTitle": "Edit Vessel Details",
+  "createTitle": "Add New Vessel",
+  "deletePrompt": "This will delete all data for \"{name}\". Do you want to proceed?",
+  "@deletePrompt": {
+    "name": {
+      "placeholders": {
+        "type": "String"
+      }
+    }
+  },
+  "searchText": "Showing results for \"{searchTerm}\"",
+  "@searchText": {
+    "name": {
+      "placeholders": {
+        "searchTerm": "String"
+      }
+    }
+  },
+  "connected": "Connected",
+  "disconnected": "Disconnected",
+  "fieldRequired": "Field required.",
+  "doubleValidation": "Please enter a valid number",
+  "latitudeValidation": "Please enter a valid latitude",
+  "longitudeValidation": "Please enter a valid longitude",
+  "formNameTooltip": "Vessel Name",
+  "formLatitudeTooltip": "Latitude",
+  "formLongitudeTooltip": "Longitude"
 }

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
-import 'package:vessel_map/src/feature/api_manager.dart';
-import 'package:vessel_map/src/feature/item.dart';
+import 'package:vessel_map/src/feature/api_request_manager.dart';
+import 'package:vessel_map/src/feature/vessel.dart';
 import 'package:vessel_map/src/feature/item_details_form.dart';
 import 'package:vessel_map/src/feature/list_entry_builder.dart';
-import 'package:vessel_map/src/feature/map_model.dart';
-import 'package:intl/intl.dart' show toBeginningOfSentenceCase;
+import 'package:vessel_map/src/feature/app_model.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class ItemSideView extends StatefulWidget {
-  final List<Vessel> items;
+  final bool showMenuButton;
 
-  const ItemSideView({super.key, required this.items});
+  const ItemSideView({super.key, this.showMenuButton = false});
 
   @override
   State<StatefulWidget> createState() {
@@ -19,62 +21,66 @@ class ItemSideView extends StatefulWidget {
   }
 }
 
-enum VesselSortValues {
+enum VesselSortKeys {
   created,
   name,
   updated,
 }
 
 class ItemSideViewState extends State<ItemSideView> {
-  String _textValue = "";
-  String _searchTerm = "";
-  VesselSortValues _sortFunc = VesselSortValues.created;
+  String _textValue = '';
+  String _searchTerm = '';
+  VesselSortKeys _currentSortFunc = VesselSortKeys.created;
   List<Vessel> _filteredItems = [];
   final TextEditingController _textController = TextEditingController();
 
-  static final Map<VesselSortValues, int Function(Vessel, Vessel)> _sortFuncs = {
-    VesselSortValues.name: (a, b) => a.name.compareTo(b.name),
-    VesselSortValues.updated: (a, b) => a.updated.compareTo(b.updated),
-    VesselSortValues.created: (a, b) => a.id.compareTo(b.id)
+  static final Map<VesselSortKeys, int Function(Vessel, Vessel)> _sortFuncs = {
+    VesselSortKeys.name: (a, b) => a.name.compareTo(b.name),
+    VesselSortKeys.updated: (a, b) => b.updated.compareTo(a.updated),
+    VesselSortKeys.created: (a, b) => a.id.compareTo(b.id)
   };
 
-  void _setFilter() {
+  AppLocalizations? localizations;
+
+  void _setFilter(List<Vessel> items) {
+    _searchTerm = _textValue.toLowerCase();
+    final filteredItems = _filterItems(items);
     setState(() {
-      _searchTerm = _textValue.toLowerCase();
-      _filterItems();
+      _filteredItems = filteredItems;
     });
   }
 
-  void _sortItems(VesselSortValues value) {
+  void _sortItems(List<Vessel> items, VesselSortKeys value) {
+    _currentSortFunc = value;
+    final filteredItems = _filterItems(items);
     setState(() {
-      _sortFunc = value;
-      _filterItems();
+      _filteredItems = filteredItems;
     });
   }
 
-  void _filterItems() {
+  List<Vessel> _filterItems(List<Vessel> items) {
+    var func = _sortFuncs[_currentSortFunc];
+    var filteredItems =
+        items.where((x) => x.name.toLowerCase().contains(_searchTerm)).toList();
+    filteredItems.sort(func);
+    return filteredItems;
+  }
+
+  void _clearFilter(List<Vessel> items) {
+    _textController.clear();
+    _textValue = '';
+    _searchTerm = '';
+    final filteredItems = _filterItems(items);
     setState(() {
-      var func = _sortFuncs[_sortFunc];
-      _filteredItems = widget.items
-          .where((x) => x.name.toLowerCase().contains(_searchTerm))
-          .toList();
-      _filteredItems.sort(func);
+      _filteredItems = filteredItems;
     });
   }
 
-  void _clearFilter() {
-    setState(() {
-      _textController.clear();
-      _textValue = "";
-      _searchTerm = "";
-      _filterItems();
-    });
-  }
-
-  void onSubmitCreateVessel(Map<String, dynamic> payload, BuildContext? context) async {
-    await ApiManager().create(payload);
-    if (context!= null && context.mounted) {
-      Navigator.pop(context, 'Submitted');
+  void onSubmitCreateVessel(
+      Map<String, dynamic> payload, BuildContext? context) async {
+    await ApiRequestManager().create(payload);
+    if (context != null && context.mounted) {
+      Navigator.pop(context);
     }
   }
 
@@ -84,16 +90,16 @@ class ItemSideViewState extends State<ItemSideView> {
       context: context,
       builder: (context) => PointerInterceptor(
           child: AlertDialog.adaptive(
-        title: const Text('Add New Vessel'),
+        title: Text(localizations!.createTitle),
         content:
             ItemDetailsForm(formKey: formKey, onSubmit: onSubmitCreateVessel),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, 'Cancel'),
-              child: const Text('Cancel')),
+              onPressed: () => Navigator.pop(context),
+              child: Text(localizations!.cancel)),
           TextButton(
               onPressed: () => formKey.currentState!.save(),
-              child: const Text('Submit')),
+              child: Text(localizations!.submit)),
         ],
       )),
     );
@@ -101,76 +107,91 @@ class ItemSideViewState extends State<ItemSideView> {
 
   @override
   Widget build(BuildContext context) {
-    _filterItems();
-    var searchText = Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: const BorderRadius.all((Radius.circular((20))))),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text("Showing results for \"$_searchTerm\""),
-            IconButton(
-                tooltip: "Clear",
-                onPressed: _clearFilter,
-                icon: const Icon(Icons.clear))
-          ],
-        ));
-    return Column(children: [
-      Flexible(
-          flex: 0,
-          child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                      child: TextField(
-                    controller: _textController,
-                    onChanged: (value) => setState(() => _textValue = value),
-                    onSubmitted: (value) => _setFilter(),
-                    decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        labelText: "Search",
-                        suffixIcon: IconButton(
-                          tooltip: "Search",
-                          icon: const Icon(Icons.search),
-                          onPressed: _filterItems,
-                        )),
-                  )),
-                  Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: IconButton(
-                          onPressed: _addNew,
-                          icon: const Icon(Icons.add),
-                          tooltip: "Add New")),
-                  Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: PopupMenuButton(
-                          onSelected: (key) => _sortItems(key as VesselSortValues),
-                          tooltip: "Sort By",
-                          icon: const Icon(Icons.sort),
-                          itemBuilder: (context) =>
-                              VesselSortValues.values.map<PopupMenuItem>((key) {
-                                final name = toBeginningOfSentenceCase(key.name);
-                                return PopupMenuItem(
-                                    value: key, child: Text(name));
-                              }).toList()))
-                ],
-              ))),
-      (_searchTerm != "") ? searchText : const SizedBox.shrink(),
-      Expanded(child: Consumer<MapModel>(
-        builder: (context, model, child) {
-          var listEntryBuilder =
-              ListEntryBuilder(_filteredItems, model.mapController);
-          return ListView.builder(
-              restorationId: 'sampleItemListView',
-              itemCount: _filteredItems.length,
-              padding: EdgeInsets.zero,
-              itemBuilder: listEntryBuilder.itemBuilder);
-        },
-      ))
-    ]);
+    return Consumer<AppModel>(
+        builder: (BuildContext context, AppModel model, Widget? child) {
+      final items = model.items;
+      _filteredItems = _filterItems(items);
+      localizations = AppLocalizations.of(context);
+      var searchText = Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: const BorderRadius.all((Radius.circular((20))))),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                  overflow: TextOverflow.ellipsis,
+                  localizations!.searchText(_searchTerm)),
+              IconButton(
+                  tooltip: localizations!.clear,
+                  onPressed: () => _clearFilter(items),
+                  icon: const Icon(Icons.clear))
+            ],
+          ));
+      final color = Theme.of(context).colorScheme.primary;
+      return Column(children: [
+        Flexible(
+            flex: 0,
+            child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: Row(
+                  children: [
+                    widget.showMenuButton
+                        ? Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: IconButton(
+                                onPressed: () => Navigator.pop(context),
+                                icon: const Icon(Icons.menu)))
+                        : const SizedBox.shrink(),
+                    Expanded(
+                        child: TextField(
+                      controller: _textController,
+                      onChanged: (value) => setState(() => _textValue = value),
+                      onSubmitted: (value) => _setFilter(items),
+                      decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          labelText: localizations!.search,
+                          suffixIcon: IconButton(
+                            tooltip: localizations!.search,
+                            icon: const Icon(Icons.search),
+                            onPressed: () => _setFilter(items),
+                          )),
+                    )),
+                    Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: IconButton(
+                            onPressed: _addNew,
+                            icon: const Icon(Icons.add),
+                            tooltip: localizations!.addTooltip)),
+                    Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: PopupMenuButton(
+                            onSelected: (key) =>
+                                _sortItems(items, key as VesselSortKeys),
+                            tooltip: localizations!.sortTooltip,
+                            icon: const Icon(Icons.sort),
+                            itemBuilder: (context) =>
+                                VesselSortKeys.values.map<PopupMenuItem>((key) {
+                                  final name =
+                                      toBeginningOfSentenceCase(key.name);
+                                  return PopupMenuItem(
+                                      value: key, child: Text(name));
+                                }).toList()))
+                  ],
+                ))),
+        (_searchTerm != '') ? searchText : const SizedBox.shrink(),
+        Expanded(
+            child: model.isConnected
+                ? ListView.builder(
+                    restorationId: 'sampleItemListView',
+                    itemCount: _filteredItems.length,
+                    padding: EdgeInsets.zero,
+                    itemBuilder: ListEntryBuilder(items: _filteredItems).itemBuilder)
+                : LoadingAnimationWidget.beat(color: color, size: 32))
+      ]);
+    });
   }
 
   @override

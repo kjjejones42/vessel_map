@@ -1,48 +1,57 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
-import 'package:vessel_map/src/feature/api_manager.dart';
-import 'package:vessel_map/src/feature/item.dart';
+import 'package:provider/provider.dart';
+import 'package:vessel_map/src/feature/api_request_manager.dart';
+import 'package:vessel_map/src/feature/app_model.dart';
+import 'package:vessel_map/src/feature/vessel.dart';
 import 'package:vessel_map/src/feature/item_details_form.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ListEntryBuilder {
-  final List<Vessel> _items;
-  final GoogleMapController? _controller;
+  final List<Vessel> items;
+  AppLocalizations? localizations;
 
-  ListEntryBuilder(this._items, this._controller);
+  ListEntryBuilder({required this.items});
 
   void goToMapLocation(GoogleMapController controller, Vessel item) {
     controller.showMarkerInfoWindow(item.markerId);
-    controller.animateCamera(CameraUpdate.zoomTo(10));
     controller.animateCamera(CameraUpdate.newLatLng(item.location));
   }
 
   void onDeleteClick(BuildContext context, Vessel item) {
     showDialog(
         context: context,
-        builder: (context) => PointerInterceptor(
-                child: AlertDialog.adaptive(
-              title: const Text("Warning"),
-              content: Text(
-                  "This will delete all data for \"${item.name}\". Do you want to proceed?"),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.pop(context, 'Cancel'),
-                    child: const Text('Cancel')),
-                TextButton(
-                    onPressed: () {
-                      ApiManager().delete(item.id);
-                      Navigator.pop(context, 'OK');
-                    },
-                    child: const Text('OK')),
-              ],
-            )));
+        builder: (context) {
+          return PointerInterceptor(
+              child: AlertDialog.adaptive(
+            title: Text(localizations!.warningTitle),
+            content: Text(localizations!.deletePrompt(item.name)),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(localizations!.cancel)),
+              TextButton(
+                  onPressed: () async {
+                    await ApiRequestManager().delete(item.id);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text(localizations!.ok)),
+            ],
+          ));
+        });
   }
 
-  void onSubmitEditForm(Map<String, dynamic> payload, BuildContext? context) async {
-    await ApiManager().update(payload);
+  void onSubmitEditForm(
+      Map<String, dynamic> payload, BuildContext? context) async {
+    await ApiRequestManager().update(payload);
     if (context != null && context.mounted) {
-      Navigator.pop(context, 'Submitted');
+      Navigator.pop(context);
     }
   }
 
@@ -52,44 +61,52 @@ class ListEntryBuilder {
         context: context,
         builder: (context) => PointerInterceptor(
               child: AlertDialog.adaptive(
-                title: const Text('Edit Vessel Details'),
+                title: Text(localizations!.editTitle),
                 content: ItemDetailsForm(
                     formKey: formKey, item: item, onSubmit: onSubmitEditForm),
                 actions: [
                   TextButton(
-                      onPressed: () => Navigator.pop(context, 'Cancel'),
-                      child: const Text('Cancel')),
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(localizations!.cancel)),
                   TextButton(
                       onPressed: () => formKey.currentState!.save(),
-                      child: const Text('Submit')),
+                      child: Text(localizations!.submit)),
                 ],
               ),
             ));
   }
 
   Widget? itemBuilder(BuildContext context, int index) {
-    final item = _items[index];
-    return ListTile(
-        key: Key(item.name),
-        title: Text(item.name),
-        subtitle: Text(item.locationText),
-        leading: const CircleAvatar(
-          foregroundImage: AssetImage('assets/images/boat.png'),
-        ),
-        trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-          IconButton(
-              tooltip: "Edit",
-              onPressed: () => onEditClick(context, item),
-              icon: const Icon(Icons.edit)),
-          IconButton(
-              tooltip: "Delete",
-              onPressed: () => onDeleteClick(context, item),
-              icon: const Icon(Icons.delete))
-        ]),
-        onTap: () {
-          if (_controller != null) {
-            goToMapLocation(_controller, item);
-          }
-        });
+    return Consumer<AppModel>(builder: (context, model, child) {
+      localizations = AppLocalizations.of(context);
+      final item = items[index];
+      final locale = PlatformDispatcher.instance.locale.toString();
+
+      final lastUpdated = DateFormat.yMd(locale).add_jms().format(item.updated);
+      return ListTile(
+          key: Key(item.name),
+          title: Text(item.name),
+          subtitle:
+              Text('Updated: $lastUpdated\nLocation: ${item.locationText}'),
+          leading: const CircleAvatar(
+            foregroundImage: AssetImage('assets/images/boat.png'),
+          ),
+          trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+            IconButton(
+                tooltip: localizations!.edit,
+                onPressed: () => onEditClick(context, item),
+                icon: const Icon(Icons.edit)),
+            IconButton(
+                tooltip: localizations!.delete,
+                onPressed: () => onDeleteClick(context, item),
+                icon: const Icon(Icons.delete))
+          ]),
+          onTap: () {
+            final mapController = model.mapController;
+            if (mapController != null) {
+              goToMapLocation(mapController, item);
+            }
+          });
+    });
   }
 }

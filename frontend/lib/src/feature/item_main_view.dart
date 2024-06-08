@@ -1,56 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
+import 'package:provider/provider.dart';
+import 'package:vessel_map/src/feature/app_model.dart';
 import 'package:vessel_map/src/feature/item_side_view.dart';
 import 'package:vessel_map/src/feature/map_view.dart';
-
-import 'item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ItemMainView extends StatelessWidget {
-  const ItemMainView({
-    super.key,
-    required this.items,
-  });
+  const ItemMainView({super.key});
 
-  static const routeName = '/';
 
-  final List<Vessel> items;
-
-  Widget _portraitView(BuildContext context) {
+  Widget _portraitView(AppBar appBar, BuildContext context) {
     var minWidth = MediaQuery.of(context).size.width * .75;
-    var menuIcon = Padding(padding: const EdgeInsets.fromLTRB(8, 8, 0, 0), child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.menu)));
     return Scaffold(
-      appBar: _appBar,
-      body: MapView(items: items),
-      drawer: PointerInterceptor(child: ConstrainedBox(
-        constraints: BoxConstraints(minWidth: minWidth), 
-        child: Drawer(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              menuIcon,
-              Expanded(child: ItemSideView(items: items)),
-          ],))
-      ))
-    );
+        appBar: appBar,
+        body: const MapView(),
+        drawer: PointerInterceptor(
+            child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: minWidth),
+                child: const Drawer(
+                    child: ItemSideView(showMenuButton: true)))));
   }
 
-  Widget _landscapeView() {
+  Widget _landscapeView(AppBar appBar) {
     return Scaffold(
-        appBar: _appBar,
+        appBar: appBar,
         body: Row(children: [
-          Flexible(flex: 1, child: ItemSideView(items: items)),
-          Expanded(flex: 2, child: MapView(items: items))
+          ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: const ItemSideView()),
+          const Expanded(child: MapView())
         ]));
   }
 
-  AppBar get _appBar => AppBar(title: const Text('Sample Items'));
+  AppBar _appBar(BuildContext context, bool isConnected) {
+    final localizations = AppLocalizations.of(context);
+    return AppBar(
+        title:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Text(localizations!.appTitle),
+      Tooltip(
+          message: isConnected
+              ? localizations.connected
+              : localizations.disconnected,
+          child: Icon(
+            Icons.circle,
+            color: isConnected ? Colors.green : Colors.red,
+          )),
+    ]));
+  }
+
+  bool _shouldShowDrawer(BuildContext context) {
+    final query = MediaQuery.of(context);
+    final orientation = query.orientation == Orientation.portrait;
+    return orientation || query.size.width < 1440;
+  }
 
   @override
   Widget build(BuildContext context) {
-    var orientation = MediaQuery.of(context).orientation;
-    return switch (orientation) {
-      Orientation.landscape => _landscapeView(),
-      Orientation.portrait => _portraitView(context)
-    };
+    return Consumer<AppModel>(builder: (context, model, child) {
+      final appBar = _appBar(context, model.isConnected);
+      return _shouldShowDrawer(context)
+          ? _portraitView(appBar, context)
+          : _landscapeView(appBar);
+    });
   }
 }

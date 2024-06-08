@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:vessel_map/src/feature/google_maps_converter.dart';
-import 'package:vessel_map/src/feature/item.dart';
 
-import 'map_model.dart';
+import 'app_model.dart';
 
 class MapView extends StatefulWidget {
-  final List<Vessel> items;
-  const MapView({super.key, required this.items});
+  const MapView({super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -36,10 +34,10 @@ class MapViewState extends State<MapView> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MapModel>(builder: (BuildContext context, MapModel model, Widget? child) { 
+    return Consumer<AppModel>(builder: (BuildContext context, AppModel model, Widget? child) { 
       return GoogleMap(
         onMapCreated: (controller) => model.mapController = controller,
-        markers: widget.items.map(_converter.convert).toSet(),
+        markers: model.items.map(_converter.convert).toSet(),
         initialCameraPosition:
             const CameraPosition(target: LatLng(51.5072, 0.1276), zoom: 5));
      });

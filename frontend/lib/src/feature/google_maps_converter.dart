@@ -1,5 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:vessel_map/src/feature/item.dart';
+import 'package:vessel_map/src/feature/vessel.dart';
 
 class GoogleMapsMarkerConverter {
   BitmapDescriptor icon;
