@@ -8,7 +8,6 @@ import 'package:universal_html/js.dart' as js;
 import 'src/app.dart';
 
 void initialiseApp() async {
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(
       ChangeNotifierProvider(create: (_) => AppModel(), child: const MyApp()));
 }

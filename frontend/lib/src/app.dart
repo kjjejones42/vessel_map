@@ -27,15 +27,17 @@ class MyAppState extends State<MyApp> {
   SocketStatus? _socketStatus;
   Timer? _updateStatusTimer;
 
+  static const Color themeColor = Colors.blue;
+
   ThemeData createTheme(Color color, Brightness brightness) {
-    ColorScheme colorScheme = ColorScheme.fromSeed(seedColor: color, brightness: brightness);
+    ColorScheme colorScheme =
+        ColorScheme.fromSeed(seedColor: color, brightness: brightness);
     return ThemeData(
-      brightness: brightness,
-      colorScheme: colorScheme,
-      appBarTheme: AppBarTheme(
-          foregroundColor: colorScheme.onPrimaryContainer,
-          backgroundColor: colorScheme.primaryContainer) 
-    );
+        brightness: brightness,
+        colorScheme: colorScheme,
+        appBarTheme: AppBarTheme(
+            foregroundColor: colorScheme.onPrimaryContainer,
+            backgroundColor: colorScheme.primaryContainer));
   }
 
   List<Vessel> parseVessels(String? responseBody) {
@@ -75,30 +77,30 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en', 'GB')
-        ],
-        onGenerateTitle: (BuildContext context) =>
-            AppLocalizations.of(context)!.appTitle,
-        restorationScopeId: 'app',
-        theme: createTheme(Colors.blue, Brightness.light),
-        darkTheme: createTheme(Colors.blue, Brightness.dark),
-        home: StreamBuilder(
-            stream: channel.incomingMessagesStream,
-            builder: (context, messageSnapshot) {
-              return Consumer<AppModel>(builder: (BuildContext context, AppModel model, Widget? child) {
-                bool isConnected = _socketStatus == SocketStatus.connected;
-                model.isConnected = isConnected;
-                model.items = parseVessels(messageSnapshot.data);
-                return const ItemMainView();
-                });
-            }));
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en', 'GB')],
+      onGenerateTitle: (BuildContext context) =>
+          AppLocalizations.of(context)!.appTitle,
+      restorationScopeId: 'app',
+      theme: createTheme(themeColor, Brightness.light),
+      darkTheme: createTheme(themeColor, Brightness.dark),
+      home: StreamBuilder(
+          stream: channel.incomingMessagesStream,
+          builder: (context, messageSnapshot) {
+            return Consumer<AppModel>(
+                builder: (BuildContext context, AppModel model, Widget? child) {
+              bool isConnected = _socketStatus == SocketStatus.connected;
+              model.isConnected = isConnected;
+              model.items = parseVessels(messageSnapshot.data);
+              return const ItemMainView();
+            });
+          }),
+    );
   }
 
   @override

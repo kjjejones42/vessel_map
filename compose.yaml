@@ -19,7 +19,6 @@ services:
       context: .
       args:
         PORT: ${PORT}
-        HOST: ${HOST}
         APIKEY: ${APIKEY}
         MYSQL_DATABASE: ${MYSQL_DATABASE}
         MYSQL_USER: ${MYSQL_USER}

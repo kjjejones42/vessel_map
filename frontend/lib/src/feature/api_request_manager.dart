@@ -3,17 +3,16 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class ApiRequestManager {
-  static const String _port =
-      String.fromEnvironment('PORT', defaultValue: '3000');
-  static const String _host =
-      String.fromEnvironment('HOST', defaultValue: 'localhost');
-
-  static final Uri _endpoint = Uri.parse('http://$_host:$_port/api');
   static const Map<String, String> _headers = {
     'Content-Type': 'application/json'
   };
 
-  static const String wsUri = 'ws://$_host:$_port/api';
+  static const int _port = int.fromEnvironment('PORT', defaultValue: 3000);
+
+  static final Uri _endpoint = Uri(scheme: 'http', host: Uri.base.host, port: _port, path: '/api');
+
+  static final String wsUri = Uri(scheme: 'ws', host: Uri.base.host, port: _port, path: '/api').toString();
+
 
   Future<String?> _call(
       Future<http.Response> Function(Uri,
