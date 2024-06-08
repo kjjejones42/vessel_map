@@ -64,8 +64,8 @@ export class UserRepository {
   update(vessel: IVessel): Promise<IVessel | undefined> {
     return new Promise((resolve, reject) => {
       pool.query<ResultSetHeader>(
-        "UPDATE vessels SET name = ?, latitude = ?, longitude = ? WHERE id = ?",
-        [vessel.name, vessel.latitude, vessel.longitude, vessel.id],
+        "UPDATE vessels SET name = ?, latitude = ?, longitude = ?, updated_at = ? WHERE id = ?",
+        [vessel.name, vessel.latitude, vessel.longitude, new Date(), vessel.id],
         (err, _) => {
           if (err) reject(err)
           else
