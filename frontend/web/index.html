@@ -64,19 +64,19 @@
   <body>
     <div class="centered spinner"></div>
     <script>
+      window.initMap = function() {
+        window.googleMapsLoaded = true;
+        document.dispatchEvent(new Event("google-maps-loaded"));
+      }
       document.addEventListener(
         "google-maps-api-key-loaded",
         function (event) {
           var script = document.createElement("script");
           script.src =
-            "https://maps.googleapis.com/maps/api/js?key=" + event.detail;
+            "https://maps.googleapis.com/maps/api/js?key=" + event.detail + "&loading=async&callback=initMap";
           script.defer = true;
           script.async = true;
           document.head.appendChild(script);
-          script.addEventListener("load", function () {
-            window.googleMapsLoaded = true;
-            document.dispatchEvent(new Event("google-maps-loaded"));
-          });
         },
         { once: true }
       );
