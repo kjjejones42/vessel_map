@@ -10,6 +10,8 @@ import 'package:vessel_map/src/widgets/google_maps_container.dart';
 class MainView extends StatelessWidget {
   const MainView({super.key});
 
+  /// The layout to use on portrait / narrow screens.
+  /// Hides the sidebar in a menu drawer.
   Widget portraitView(AppBar appBar, BuildContext context) {
     var minWidth = MediaQuery.of(context).size.width * .75;
     return Scaffold(
@@ -18,9 +20,11 @@ class MainView extends StatelessWidget {
         drawer: PointerInterceptor(
             child: ConstrainedBox(
                 constraints: BoxConstraints(minWidth: minWidth),
-                child: const Drawer(child: SideView(showMenuButton: true)))));
+                child: const Drawer(child: SideView(isInDrawer: true)))));
   }
 
+  /// The layout to use on landscape / wide screens.
+  /// Shows the sidebar on the left side of the page.
   Widget landscapeView(AppBar appBar) {
     return Scaffold(
         appBar: appBar,
@@ -32,6 +36,8 @@ class MainView extends StatelessWidget {
         ]));
   }
 
+  /// The layout to use if not connected to the server.
+  /// Hides the map and sidebar, and only shows the appbar and a loader.
   Widget loadingView(BuildContext context, AppBar appBar) {
     final color = Theme.of(context).colorScheme.primary;
     final text = AppLocalizations.of(context)!.disconnectedMessage;
@@ -44,6 +50,7 @@ class MainView extends StatelessWidget {
         ])));
   }
 
+  /// The appbar that shows at the top of the app.
   AppBar appBar(BuildContext context, bool isConnected) {
     final localizations = AppLocalizations.of(context);
     return AppBar(
@@ -61,10 +68,12 @@ class MainView extends StatelessWidget {
     ]));
   }
 
-  bool shouldShowDrawer(BuildContext context) {
+  /// Determines whether to use the portrait view and hide the sidebar in a
+  /// menu drawer.
+  bool shouldUsePortraitView(BuildContext context) {
     final query = MediaQuery.of(context);
     final orientation = query.orientation == Orientation.portrait;
-    return orientation || query.size.width < 1440;
+    return orientation || query.size.width < 1400;
   }
 
   @override
@@ -74,9 +83,10 @@ class MainView extends StatelessWidget {
       if (!model.isConnected) {
         return loadingView(context, bar);
       }
-      return shouldShowDrawer(context)
-          ? portraitView(bar, context)
-          : landscapeView(bar);
+      if (shouldUsePortraitView(context)) {
+        return portraitView(bar, context);
+      }
+      return landscapeView(bar);
     });
   }
 }

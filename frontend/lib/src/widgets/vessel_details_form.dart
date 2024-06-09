@@ -4,16 +4,15 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:vessel_map/src/models/vessel.dart';
 
 class VesselDetailsForm extends StatefulWidget {
+  /// If specified, the form's default input values are set to the vessel properties.
   final Vessel? vessel;
   final GlobalKey<FormState> formKey;
-  final void Function(Map<String, Object>, BuildContext?)? onSubmit;
+  final void Function(Map<String, Object>, BuildContext?) onSubmit;
   const VesselDetailsForm(
-      {super.key, required this.formKey, this.vessel, this.onSubmit});
+      {super.key, required this.formKey, this.vessel, required this.onSubmit});
 
   @override
-  State<StatefulWidget> createState() {
-    return VesselDetailsFormState();
-  }
+  State<StatefulWidget> createState() => VesselDetailsFormState();
 }
 
 class VesselDetailsFormState extends State<VesselDetailsForm> {
@@ -24,6 +23,7 @@ class VesselDetailsFormState extends State<VesselDetailsForm> {
 
   AppLocalizations? localizations;
 
+  /// Validates the name field on submit.
   String? nameValidator(String? value) {
     if (value == null || value.isEmpty) {
       return localizations!.fieldRequired;
@@ -31,13 +31,16 @@ class VesselDetailsFormState extends State<VesselDetailsForm> {
     return null;
   }
 
+  /// Validates the latitude and longitude fields on submit,
+  /// then calls a specific validator for each field
   String? doubleValidator(String? value, String? Function(double) validator) {
     if (value == null || value.isEmpty) return localizations!.fieldRequired;
-    double? num = double.tryParse(value);
-    if (num == null) return localizations!.doubleValidation;
-    return validator(num);
+    double? number = double.tryParse(value);
+    if (number == null) return localizations!.doubleValidation;
+    return validator(number);
   }
 
+  /// Validates the latitude field.
   String? latitudeValidator(double value) {
     if (value < -90 || value > 90) {
       return localizations!.latitudeValidation;
@@ -45,6 +48,7 @@ class VesselDetailsFormState extends State<VesselDetailsForm> {
     return null;
   }
 
+  /// Validates the longitude field.
   String? longitudeValidator(double value) {
     if (value < -180 || value > 180) {
       return localizations!.longitudeValidation;
@@ -63,7 +67,7 @@ class VesselDetailsFormState extends State<VesselDetailsForm> {
       if (vessel != null) {
         payload['id'] = vessel.id;
       }
-      widget.onSubmit!(payload, formKey.currentContext);
+      widget.onSubmit(payload, formKey.currentContext);
     }
   }
 

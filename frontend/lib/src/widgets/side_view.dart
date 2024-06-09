@@ -9,18 +9,24 @@ import 'package:vessel_map/src/widgets/search_text_bar.dart';
 import 'package:vessel_map/src/widgets/sort_button.dart';
 
 class SideView extends StatefulWidget {
-  final bool showMenuButton;
-  const SideView({super.key, this.showMenuButton = false});
+  /// Whether to use the menu drawer layout or not.
+  final bool isInDrawer;
+  const SideView({super.key, this.isInDrawer = false});
 
   @override
   State<StatefulWidget> createState() => SideViewState();
 }
 
 class SideViewState extends State<SideView> {
-  String searchTerm = '';
+  /// The text by which the entries are currently filtered.
+  String filterTerm = '';
+
+  /// The current sorting function for the entries.
   SortKeys currentSortFunc = SortKeys.created;
+
   final TextEditingController textController = TextEditingController();
 
+  /// The functions used to sort the entries list.
   static final Map<SortKeys, int Function(Vessel, Vessel)> sortingFunctions = {
     SortKeys.name: (a, b) => a.name.compareTo(b.name),
     SortKeys.updated: (a, b) => b.updated.compareTo(a.updated),
@@ -31,7 +37,7 @@ class SideViewState extends State<SideView> {
 
   void setFilter(String value) {
     setState(() {
-      searchTerm = value.toLowerCase();
+      filterTerm = value.toLowerCase();
     });
   }
 
@@ -44,27 +50,32 @@ class SideViewState extends State<SideView> {
   void clearFilter() {
     setState(() {
       textController.clear();
-      searchTerm = '';
+      filterTerm = '';
     });
   }
 
-  List<Vessel> filter(List<Vessel> vessels) {
+  /// Filters and sorts the supplied lists by the chosen filter term and
+  /// sorting function. Returns the processed list.
+  List<Vessel> filterAndSort(List<Vessel> vessels) {
     var func = sortingFunctions[currentSortFunc];
     var entries = vessels
-        .where((x) => x.name.toLowerCase().contains(searchTerm))
+        .where((x) => x.name.toLowerCase().contains(filterTerm))
         .toList();
     entries.sort(func);
     return entries;
   }
 
+  /// The chip to show when the entries are filtered. Includes a icon to
+  /// clear the filter.
   Widget searchTextChip() => Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: InputChip(
-        label: Text(localizations!.searchText(searchTerm)),
+        label: Text(localizations!.searchText(filterTerm)),
         deleteButtonTooltipMessage: localizations!.clear,
         onDeleted: clearFilter,
       ));
 
+  /// The layout to use if not a menu drawer.
   Widget nonDrawerSearchBar() => Flexible(
       flex: 0,
       child: Padding(
@@ -83,6 +94,7 @@ class SideViewState extends State<SideView> {
             ],
           )));
 
+  /// The layout to use if in a menu drawer. Includes a button to close the menu.
   Widget drawerSearchBar() => Flexible(
       flex: 0,
       child: Column(children: [
@@ -114,11 +126,11 @@ class SideViewState extends State<SideView> {
   Widget build(BuildContext context) {
     return Consumer<AppModel>(
         builder: (BuildContext context, AppModel model, Widget? child) {
-      final entries = filter(model.vessels);
+      final entries = filterAndSort(model.vessels);
       localizations = AppLocalizations.of(context);
       return Column(children: [
-        (widget.showMenuButton) ? drawerSearchBar() : nonDrawerSearchBar(),
-        (searchTerm != '') ? searchTextChip() : const SizedBox.shrink(),
+        (widget.isInDrawer) ? drawerSearchBar() : nonDrawerSearchBar(),
+        (filterTerm != '') ? searchTextChip() : const SizedBox.shrink(),
         Expanded(
             child: entries.isEmpty
                 ? Text(localizations!.noResults)

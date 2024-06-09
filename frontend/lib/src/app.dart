@@ -25,8 +25,9 @@ class MyAppState extends State<MyApp> {
       ApiRequestManager.websocketUri.toString(), SocketSimpleTextProcessor());
 
   SocketStatus? socketStatus;
-  Timer? updateStatusTimer;
+  Timer? updateSocketStatusTimer;
 
+  /// Parse JSON message from websocket to list of Vessel objects
   List<Vessel> parseVessels(String? responseBody) {
     if (responseBody == null) return [];
     final parsed =
@@ -36,18 +37,18 @@ class MyAppState extends State<MyApp> {
 
   // Only change the socket status from 'connected' after a 1 second Timer, to
   // prevent UI flickering from intermittent connection or routine pings.
-  void onSocketStateChange(ISocketState state) {
+  void updateSocketStatus(ISocketState state) {
     switch (state.status) {
       case SocketStatus.connecting:
-        updateStatusTimer ??= Timer(const Duration(seconds: 1), () {
+        updateSocketStatusTimer ??= Timer(const Duration(seconds: 1), () {
           if (state.status != SocketStatus.connected) {
             setState(() => socketStatus = state.status);
           }
-          updateStatusTimer = null;
+          updateSocketStatusTimer = null;
         });
       case SocketStatus.connected:
-        updateStatusTimer?.cancel();
-        updateStatusTimer = null;
+        updateSocketStatusTimer?.cancel();
+        updateSocketStatusTimer = null;
         setState(() => socketStatus = SocketStatus.connected);
       case SocketStatus.disconnected:
         setState(() => socketStatus = SocketStatus.disconnected);
@@ -57,13 +58,14 @@ class MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    channel.socketHandlerStateStream.listen(onSocketStateChange);
+    channel.socketHandlerStateStream.listen(updateSocketStatus);
     channel.connect();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // Make localisation delegates available
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -71,16 +73,20 @@ class MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en')],
+      // Generate title from localisation resources
       onGenerateTitle: (BuildContext context) =>
           AppLocalizations.of(context)!.appTitle,
       restorationScopeId: 'app',
+      // Declare app themes
       theme: ThemeManager.createTheme(Brightness.light),
       darkTheme: ThemeManager.createTheme(Brightness.dark),
+      // Wrap app in Streambuilder to listen to changes from websocket
       home: StreamBuilder(
           stream: channel.incomingMessagesStream,
           builder: (context, messageSnapshot) {
             return Consumer<AppModel>(
                 builder: (BuildContext context, AppModel model, Widget? child) {
+              // Update model on change
               model.isConnected = socketStatus == SocketStatus.connected;
               model.vessels = parseVessels(messageSnapshot.data);
               return const MainView();

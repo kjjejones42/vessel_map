@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vessel_map/src/models/vessel.dart';
 
@@ -11,9 +12,8 @@ class AppModel extends ChangeNotifier {
 
   set isConnected(bool isConnected) {
     if (_isConnected != isConnected) {
-      Future.delayed(Duration.zero, () {
+      _setAndNotifyListeners(() {
         _isConnected = isConnected;
-        notifyListeners();
       });
     }
   }
@@ -24,9 +24,8 @@ class AppModel extends ChangeNotifier {
 
   set mapController(GoogleMapController? mapController) {
     if (_mapController != mapController) {
-      Future.delayed(Duration.zero, () {
+      _setAndNotifyListeners(() {
         _mapController = mapController;
-        notifyListeners();
       });
     }
   }
@@ -37,10 +36,18 @@ class AppModel extends ChangeNotifier {
 
   set vessels(List<Vessel> vessels) {
     if (!listEquals(vessels, _vessels)) {
-      Future.delayed(Duration.zero, () {
+      _setAndNotifyListeners(() {
         _vessels = vessels;
-        notifyListeners();
       });
     }
+  }
+
+  // Only notify listeners after the current build is complete, to avoid infinite
+  // rendering loops.
+  void _setAndNotifyListeners(Function setter) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      setter();
+      notifyListeners();
+    });
   }
 }

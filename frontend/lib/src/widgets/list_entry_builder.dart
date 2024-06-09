@@ -18,11 +18,15 @@ class ListEntryBuilder {
 
   ListEntryBuilder({required this.vessels});
 
-  void goToMapLocation(GoogleMapController controller, Vessel vessel) {
-    controller.showMarkerInfoWindow(vessel.markerId);
-    controller.animateCamera(CameraUpdate.newLatLng(vessel.location));
+  /// Command the Google Maps widget to move the viewport to the vessel location.
+  void goToMapLocation(GoogleMapController? controller, Vessel vessel) {
+    if (controller != null) {
+      controller.showMarkerInfoWindow(vessel.markerId);
+      controller.animateCamera(CameraUpdate.newLatLng(vessel.location));
+    }
   }
 
+  /// Show the Delete vessel dialog box and respond to inputs.
   void onDeleteClick(BuildContext context, Vessel vessel) {
     showDialog(
         context: context,
@@ -48,14 +52,7 @@ class ListEntryBuilder {
         });
   }
 
-  void onSubmitEditForm(
-      Map<String, dynamic> payload, BuildContext? context) async {
-    await ApiRequestManager(context: context).patch(payload);
-    if (context != null && context.mounted) {
-      Navigator.pop(context);
-    }
-  }
-
+  /// Show the Edit vessel form and respond to inputs.
   void onEditClick(BuildContext context, Vessel vessel) {
     final formKey = GlobalKey<FormState>();
     showDialog(
@@ -79,34 +76,40 @@ class ListEntryBuilder {
             ));
   }
 
+  void onSubmitEditForm(
+      Map<String, dynamic> payload, BuildContext? context) async {
+    await ApiRequestManager(context: context).patch(payload);
+    if (context != null && context.mounted) {
+      Navigator.pop(context);
+    }
+  }
+
+  Widget vesselToEntry(
+      BuildContext context, Vessel vessel, GoogleMapController? mapController) {
+    final lastUpdated = DateFormat.yMd(locale).add_jms().format(vessel.updated);
+    return ListTile(
+        key: Key(vessel.hashCode.toString()),
+        title: Text(vessel.name),
+        subtitle:
+            Text(localizations!.listTileText(lastUpdated, vessel.locationText)),
+        leading: Row(mainAxisSize: MainAxisSize.min, children: [
+          IconButton(
+              tooltip: localizations!.delete,
+              onPressed: () => onDeleteClick(context, vessel),
+              icon: const Icon(Icons.delete)),
+          IconButton(
+              tooltip: localizations!.edit,
+              onPressed: () => onEditClick(context, vessel),
+              icon: const Icon(Icons.edit)),
+        ]),
+        onTap: () => goToMapLocation(mapController, vessel));
+  }
+
+  /// Build the list view entry for the vessel at the current index.
   Widget? entryBuilder(BuildContext context, int index) {
     return Consumer<AppModel>(builder: (context, model, child) {
       localizations = AppLocalizations.of(context);
-      final vessel = vessels[index];
-      final lastUpdated =
-          DateFormat.yMd(locale).add_jms().format(vessel.updated);
-      final leading = Row(mainAxisSize: MainAxisSize.min, children: [
-        IconButton(
-            tooltip: localizations!.delete,
-            onPressed: () => onDeleteClick(context, vessel),
-            icon: const Icon(Icons.delete)),
-        IconButton(
-            tooltip: localizations!.edit,
-            onPressed: () => onEditClick(context, vessel),
-            icon: const Icon(Icons.edit)),
-      ]);
-      return ListTile(
-          key: Key(vessel.hashCode.toString()),
-          title: Text(vessel.name),
-          subtitle: Text(
-              localizations!.listTileText(lastUpdated, vessel.locationText)),
-          leading: leading,
-          onTap: () {
-            final mapController = model.mapController;
-            if (mapController != null) {
-              goToMapLocation(mapController, vessel);
-            }
-          });
+      return vesselToEntry(context, vessels[index], model.mapController);
     });
   }
 }

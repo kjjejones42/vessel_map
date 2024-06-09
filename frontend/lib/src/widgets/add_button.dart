@@ -7,8 +7,7 @@ import 'package:vessel_map/src/widgets/vessel_details_form.dart';
 class AddButton extends StatelessWidget {
   const AddButton({super.key});
 
-  void onSubmitCreateVessel(
-      Map<String, dynamic> payload, BuildContext? context) async {
+  void onSubmit(Map<String, dynamic> payload, BuildContext? context) async {
     await ApiRequestManager(context: context).post(payload);
     if (context != null && context.mounted) {
       Navigator.pop(context);
@@ -22,8 +21,7 @@ class AddButton extends StatelessWidget {
       builder: (context) => PointerInterceptor(
           child: AlertDialog.adaptive(
         title: Text(localizations!.createTitle),
-        content:
-            VesselDetailsForm(formKey: formKey, onSubmit: onSubmitCreateVessel),
+        content: VesselDetailsForm(formKey: formKey, onSubmit: onSubmit),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),

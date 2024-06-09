@@ -7,8 +7,10 @@ class Vessel {
   final DateTime updated;
   const Vessel(this.id, this.name, this.location, this.updated);
 
+  /// The lat/lng of the vessel, in a human readable format.
   String get locationText => '${location.latitude}°N, ${location.longitude}°W';
 
+  /// Unique Google Maps MarkerId for this vessel.
   MarkerId get markerId => MarkerId(hashCode.toString());
 
   factory Vessel.fromJson(Map<String, dynamic> json) {
@@ -19,6 +21,7 @@ class Vessel {
         DateTime.parse(json['updated_at']).toLocal());
   }
 
+  /// Convert to Google Maps Marker for map display.
   Marker toMarker(BitmapDescriptor icon) {
     return Marker(
       markerId: markerId,
@@ -28,6 +31,9 @@ class Vessel {
     );
   }
 
+  /// Overriden hashcode implementation ensures vessel equality is calculated from
+  /// properties and not identity. This is important when the app needs to determine
+  /// whether to update the UI.
   @override
   int get hashCode => Object.hash(id, name, location, updated);
 

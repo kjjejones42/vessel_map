@@ -67,6 +67,7 @@
       window.initMap = function() {
         window.googleMapsLoaded = true;
         document.dispatchEvent(new Event("google-maps-loaded"));
+        document.querySelector('.spinner')?.remove();
       }
       document.addEventListener(
         "google-maps-api-key-loaded",

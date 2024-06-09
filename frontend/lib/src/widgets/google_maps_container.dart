@@ -14,8 +14,11 @@ class GoogleMapsContainer extends StatefulWidget {
 class GoogleMapsContainerState extends State<GoogleMapsContainer> {
   BitmapDescriptor? icon;
 
+  /// Initial map position. Could be updated to use current device location, if
+  /// client wants to request that permission.
   static const initialPosition = LatLng(51.5072, 0.1276);
 
+  /// Fetch the custom map marker image from assets, then trigger rerender.
   void fetchIcon() async {
     var icon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(size: Size(50, 50)),
@@ -31,6 +34,7 @@ class GoogleMapsContainerState extends State<GoogleMapsContainer> {
     fetchIcon();
   }
 
+  /// Converts vessels to Google Map markers.
   Set<Marker> markers(List<Vessel> vessels) {
     final icon = this.icon;
     if (icon == null) return {};
@@ -42,6 +46,8 @@ class GoogleMapsContainerState extends State<GoogleMapsContainer> {
     return Consumer<AppModel>(
         builder: (BuildContext context, AppModel model, Widget? child) {
       return GoogleMap(
+          // Once the MapController is created, add it to the model for use in the
+          // list view.
           onMapCreated: (controller) => model.mapController = controller,
           markers: markers(model.vessels),
           initialCameraPosition:

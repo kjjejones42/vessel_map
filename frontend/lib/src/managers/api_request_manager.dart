@@ -17,7 +17,7 @@ class ApiRequestManager {
       scheme: Uri.base.scheme, host: Uri.base.host, port: port, path: '/api');
 
   static final Uri websocketUri = Uri(
-      // Use 'wss' if using 'https', 'ws' otherwise, to avoid mixed content
+      // Use 'wss' if using 'https', 'ws' otherwise, to avoid mixed content.
       scheme: (Uri.base.scheme == 'https') ? 'wss' : 'ws',
       host: Uri.base.host,
       port: port,
@@ -27,7 +27,7 @@ class ApiRequestManager {
 
   ApiRequestManager({required this.context});
 
-  /// Displays the error to the user as a snackbar
+  /// Displays the error to the user as a snackbar.
   void _showError(BuildContext context, Response response) {
     final errorColor = Theme.of(context).colorScheme.error;
     final errorMessage = AppLocalizations.of(context)!.httpErrorMessage(
@@ -36,7 +36,7 @@ class ApiRequestManager {
         SnackBar(backgroundColor: errorColor, content: Text(errorMessage)));
   }
 
-  /// Provides standard functionality for all request methods
+  /// Provides standard functionality for all request methods.
   Future<String?> _call(
       Future<http.Response> Function(Uri,
               {Object? body, Encoding? encoding, Map<String, String>? headers})
@@ -56,17 +56,17 @@ class ApiRequestManager {
     return response.body;
   }
 
-  /// Execute a post request to the server
+  /// Execute a post request to the server.
   Future<String?> post(Map<String, dynamic> payload) async {
     return _call(http.post, payload);
   }
 
-  /// Execute a delete request to the server
+  /// Execute a delete request to the server.
   Future<String?> delete(int id) async {
     return _call(http.delete, {'id': id});
   }
 
-  /// Execute a patch request to the server
+  /// Execute a patch request to the server.
   Future<String?> patch(Map<String, dynamic> payload) async {
     return _call(http.patch, payload);
   }
