@@ -8,10 +8,9 @@ export default function initializeWebsocket(server: http.Server, repository: Ves
   const websocketServer = new Server({ server: server, path: '/api' })
 
   // On websocket connection, send details of all vessels.
-  websocketServer.on('connection', ws => {
-    repository.findAll().then(data => {
-      ws.send(JSON.stringify(data))
-    })
+  websocketServer.on('connection', async ws => {
+    const data = await repository.findAll();
+    ws.send(JSON.stringify(data))
   })
 
   // When the database changes, rebroadcast all vessel details to all connected clients

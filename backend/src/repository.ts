@@ -23,10 +23,9 @@ export default class VesselRepository {
     this.db.close();
   }
 
-  notifyListeners() {
-    this.findAll().then(data => {
-      this.listeners.forEach(listener => listener(data))
-    })
+  async notifyListeners() {
+    const data = await this.findAll();
+    this.listeners.forEach(listener => listener(data))
   }
 
   /**
@@ -85,11 +84,12 @@ export default class VesselRepository {
       this.db.run(
         "UPDATE vessels SET name = ?, latitude = ?, longitude = ?, updated_at = ? WHERE id = ?",
         [vessel.name, vessel.latitude, vessel.longitude, new Date().toISOString(), vessel.id],
-        err => {
+        async err => {
           if (err) reject(err)
           else {
+            const updatedVessel = await this.findById(vessel.id!);
+            resolve(updatedVessel)
             this.notifyListeners()
-            this.findById(vessel.id!).then(resolve).catch(reject)
           }
         }
       )
