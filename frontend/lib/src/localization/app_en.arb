@@ -1,6 +1,68 @@
 {
   "appTitle": "Vessel Map",
-  "@appTitle": {
-    "description": "The title of the application"
+  "noResults": "No vessels currently listed",
+  "disconnectedMessage": "Can't connect at the moment. Trying again...",
+  "ok": "OK",
+  "cancel": "Cancel",
+  "clear": "Clear",
+  "submit": "Submit",
+  "search": "Search",
+  "addTooltip": "Add New",
+  "sortTooltip": "Sort By",
+  "delete": "Delete",
+  "edit": "Edit",
+  "warningTitle": "Warning",
+  "editTitle": "Edit Vessel Details",
+  "createTitle": "Add New Vessel",
+  "connected": "Connected",
+  "disconnected": "Disconnected",
+  "fieldRequired": "Field required.",
+  "doubleValidation": "Please enter a valid number",
+  "latitudeValidation": "Please enter a valid latitude",
+  "longitudeValidation": "Please enter a valid longitude",
+  "formNameTooltip": "Vessel Name",
+  "formLatitudeTooltip": "Latitude",
+  "formLongitudeTooltip": "Longitude",
+  "deletePrompt": "This will delete all data for \"{name}\". Do you want to proceed?",
+  "@deletePrompt": {
+      "placeholders": {
+        "name": {
+          "type": "String"
+        }
+      }
+  },
+  "searchText": "Showing results for \"{searchTerm}\"",
+  "@searchText": {
+      "placeholders": {
+        "searchTerm": {
+          "type": "String"
+        }
+      }
+  },
+  "listTileText": "Updated: {lastUpdated}\nLocation: {locationText}",
+  "@listTileText": {
+      "placeholders": {
+        "lastUpdated": {
+          "type": "String"
+        },
+        "locationText": {
+          "type": "String"
+        }
+      }
+  },
+  "httpErrorMessage": "Error {statusCode} - {uri} - {reason}",
+  "@httpErrorMessage": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      },
+      "uri": {
+        "type": "Uri"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
   }
 }
+
