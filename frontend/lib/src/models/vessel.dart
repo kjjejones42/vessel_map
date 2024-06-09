@@ -19,6 +19,15 @@ class Vessel {
         DateTime.parse(json['updated_at']).toLocal());
   }
 
+  Marker toMarker(BitmapDescriptor icon) {
+    return Marker(
+      markerId: markerId,
+      position: location,
+      infoWindow: InfoWindow(title: name, snippet: locationText),
+      icon: icon,
+    );
+  }
+
   @override
   int get hashCode => Object.hash(id, name, location, updated);
 

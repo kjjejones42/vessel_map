@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
-enum VesselSortKeys {
+enum SortKeys {
   created,
   name,
   updated,
 }
 
-class SortItemsButton extends StatelessWidget {
-  final Function(VesselSortKeys) onChange;
+class SortButton extends StatelessWidget {
+  final Function(SortKeys) onChange;
 
-  const SortItemsButton({super.key, required this.onChange});
+  const SortButton({super.key, required this.onChange});
 
   @override
   Widget build(BuildContext context) {
@@ -19,11 +19,10 @@ class SortItemsButton extends StatelessWidget {
     return Padding(
         padding: const EdgeInsets.all(4),
         child: PopupMenuButton(
-            onSelected: (key) => onChange(key as VesselSortKeys),
+            onSelected: (key) => onChange(key as SortKeys),
             tooltip: localizations!.sortTooltip,
             icon: const Icon(Icons.sort),
-            itemBuilder: (context) =>
-                VesselSortKeys.values.map<PopupMenuItem>((key) {
+            itemBuilder: (context) => SortKeys.values.map<PopupMenuItem>((key) {
                   final name = toBeginningOfSentenceCase(key.name);
                   return PopupMenuItem(value: key, child: Text(name));
                 }).toList()));

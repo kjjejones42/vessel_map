@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:vessel_map/src/feature/google_maps_converter.dart';
-import 'package:vessel_map/src/feature/vessel.dart';
+import 'package:vessel_map/src/models/app_model.dart';
+import 'package:vessel_map/src/models/vessel.dart';
 
-import 'app_model.dart';
-
-class MapView extends StatefulWidget {
-  const MapView({super.key});
+class GoogleMapsContainer extends StatefulWidget {
+  const GoogleMapsContainer({super.key});
 
   @override
-  State<StatefulWidget> createState() => MapViewState();
+  State<StatefulWidget> createState() => GoogleMapsContainerState();
 }
 
-class MapViewState extends State<MapView> {
-  GoogleMapsMarkerConverter? _converter;
+class GoogleMapsContainerState extends State<GoogleMapsContainer> {
+  BitmapDescriptor? icon;
 
   static const initialPosition = LatLng(51.5072, 0.1276);
 
@@ -23,7 +21,7 @@ class MapViewState extends State<MapView> {
         const ImageConfiguration(size: Size(50, 50)),
         'assets/images/boat_marker.png');
     setState(() {
-      _converter = GoogleMapsMarkerConverter(icon);
+      this.icon = icon;
     });
   }
 
@@ -33,10 +31,10 @@ class MapViewState extends State<MapView> {
     fetchIcon();
   }
 
-  Set<Marker> markers(List<Vessel> items) {
-    final converter = _converter;
-    if (converter == null) return {};
-    return items.map(converter.convert).toSet();
+  Set<Marker> markers(List<Vessel> vessels) {
+    final icon = this.icon;
+    if (icon == null) return {};
+    return vessels.map((vessel) => vessel.toMarker(icon)).toSet();
   }
 
   @override
@@ -45,7 +43,7 @@ class MapViewState extends State<MapView> {
         builder: (BuildContext context, AppModel model, Widget? child) {
       return GoogleMap(
           onMapCreated: (controller) => model.mapController = controller,
-          markers: markers(model.items),
+          markers: markers(model.vessels),
           initialCameraPosition:
               const CameraPosition(target: initialPosition, zoom: 5));
     });

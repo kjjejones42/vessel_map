@@ -2,38 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
-import 'package:vessel_map/src/feature/app_model.dart';
-import 'package:vessel_map/src/feature/item_side_view.dart';
-import 'package:vessel_map/src/feature/map_view.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:vessel_map/src/models/app_model.dart';
+import 'package:vessel_map/src/widgets/side_view.dart';
+import 'package:vessel_map/src/widgets/google_maps_container.dart';
 
-class ItemMainView extends StatelessWidget {
-  const ItemMainView({super.key});
+class MainView extends StatelessWidget {
+  const MainView({super.key});
 
-  Widget _portraitView(AppBar appBar, BuildContext context) {
+  Widget portraitView(AppBar appBar, BuildContext context) {
     var minWidth = MediaQuery.of(context).size.width * .75;
     return Scaffold(
         appBar: appBar,
-        body: const MapView(),
+        body: const GoogleMapsContainer(),
         drawer: PointerInterceptor(
             child: ConstrainedBox(
                 constraints: BoxConstraints(minWidth: minWidth),
-                child:
-                    const Drawer(child: ItemSideView(showMenuButton: true)))));
+                child: const Drawer(child: SideView(showMenuButton: true)))));
   }
 
-  Widget _landscapeView(AppBar appBar) {
+  Widget landscapeView(AppBar appBar) {
     return Scaffold(
         appBar: appBar,
         body: Row(children: [
           ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),
-              child: const ItemSideView()),
-          const Expanded(child: MapView())
+              child: const SideView()),
+          const Expanded(child: GoogleMapsContainer())
         ]));
   }
 
-  Widget _loadingView(BuildContext context, AppBar appBar) {
+  Widget loadingView(BuildContext context, AppBar appBar) {
     final color = Theme.of(context).colorScheme.primary;
     final text = AppLocalizations.of(context)!.disconnectedMessage;
     return Scaffold(
@@ -45,7 +44,7 @@ class ItemMainView extends StatelessWidget {
         ])));
   }
 
-  AppBar _appBar(BuildContext context, bool isConnected) {
+  AppBar appBar(BuildContext context, bool isConnected) {
     final localizations = AppLocalizations.of(context);
     return AppBar(
         title:
@@ -62,7 +61,7 @@ class ItemMainView extends StatelessWidget {
     ]));
   }
 
-  bool _shouldShowDrawer(BuildContext context) {
+  bool shouldShowDrawer(BuildContext context) {
     final query = MediaQuery.of(context);
     final orientation = query.orientation == Orientation.portrait;
     return orientation || query.size.width < 1440;
@@ -71,13 +70,13 @@ class ItemMainView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<AppModel>(builder: (context, model, child) {
-      final appBar = _appBar(context, model.isConnected);
+      final bar = appBar(context, model.isConnected);
       if (!model.isConnected) {
-        return _loadingView(context, appBar);
+        return loadingView(context, bar);
       }
-      return _shouldShowDrawer(context)
-          ? _portraitView(appBar, context)
-          : _landscapeView(appBar);
+      return shouldShowDrawer(context)
+          ? portraitView(bar, context)
+          : landscapeView(bar);
     });
   }
 }

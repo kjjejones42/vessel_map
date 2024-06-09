@@ -2,10 +2,9 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:vessel_map/src/feature/vessel.dart';
+import 'package:vessel_map/src/models/vessel.dart';
 
 class AppModel extends ChangeNotifier {
-
   bool _isConnected = false;
 
   bool get isConnected => _isConnected;
@@ -32,18 +31,16 @@ class AppModel extends ChangeNotifier {
     }
   }
 
-  List<Vessel> _items = [];
+  List<Vessel> _vessels = [];
 
-  UnmodifiableListView<Vessel> get items => UnmodifiableListView(_items);
+  UnmodifiableListView<Vessel> get vessels => UnmodifiableListView(_vessels);
 
-  set items(List<Vessel> items) {
-    if (!listEquals(items, _items)) {
+  set vessels(List<Vessel> vessels) {
+    if (!listEquals(vessels, _vessels)) {
       Future.delayed(Duration.zero, () {
-        _items = items;
+        _vessels = vessels;
         notifyListeners();
       });
     }
   }
-  
-
 }

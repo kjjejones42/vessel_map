@@ -5,12 +5,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:vessel_map/src/feature/api_request_manager.dart';
-import 'package:vessel_map/src/feature/app_model.dart';
-import 'package:vessel_map/src/feature/vessel.dart';
+import 'package:vessel_map/src/managers/api_request_manager.dart';
+import 'package:vessel_map/src/managers/theme_manager.dart';
+import 'package:vessel_map/src/models/app_model.dart';
+import 'package:vessel_map/src/models/vessel.dart';
+import 'package:vessel_map/src/widgets/main_view.dart';
 import 'package:websocket_universal/websocket_universal.dart';
-
-import 'feature/item_main_view.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -22,23 +22,10 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   /// WebSocket channel to receive real-time data.
   var channel = IWebSocketHandler.createClient(
-      ApiRequestManager.wsUri, SocketSimpleTextProcessor());
+      ApiRequestManager.websocketUri.toString(), SocketSimpleTextProcessor());
 
-  SocketStatus? _socketStatus;
-  Timer? _updateStatusTimer;
-
-  static const Color themeColor = Colors.blue;
-
-  ThemeData createTheme(Color color, Brightness brightness) {
-    ColorScheme colorScheme =
-        ColorScheme.fromSeed(seedColor: color, brightness: brightness);
-    return ThemeData(
-        brightness: brightness,
-        colorScheme: colorScheme,
-        appBarTheme: AppBarTheme(
-            foregroundColor: colorScheme.onPrimaryContainer,
-            backgroundColor: colorScheme.primaryContainer));
-  }
+  SocketStatus? socketStatus;
+  Timer? updateStatusTimer;
 
   List<Vessel> parseVessels(String? responseBody) {
     if (responseBody == null) return [];
@@ -49,28 +36,28 @@ class MyAppState extends State<MyApp> {
 
   // Only change the socket status from 'connected' after a 1 second Timer, to
   // prevent UI flickering from intermittent connection or routine pings.
-  void _onSocketStateChange(ISocketState state) {
+  void onSocketStateChange(ISocketState state) {
     switch (state.status) {
       case SocketStatus.connecting:
-        _updateStatusTimer ??= Timer(const Duration(seconds: 1), () {
+        updateStatusTimer ??= Timer(const Duration(seconds: 1), () {
           if (state.status != SocketStatus.connected) {
-            setState(() => _socketStatus = state.status);
+            setState(() => socketStatus = state.status);
           }
-          _updateStatusTimer = null;
+          updateStatusTimer = null;
         });
       case SocketStatus.connected:
-        _updateStatusTimer?.cancel();
-        _updateStatusTimer = null;
-        setState(() => _socketStatus = SocketStatus.connected);
+        updateStatusTimer?.cancel();
+        updateStatusTimer = null;
+        setState(() => socketStatus = SocketStatus.connected);
       case SocketStatus.disconnected:
-        setState(() => _socketStatus = SocketStatus.disconnected);
+        setState(() => socketStatus = SocketStatus.disconnected);
     }
   }
 
   @override
   void initState() {
     super.initState();
-    channel.socketHandlerStateStream.listen(_onSocketStateChange);
+    channel.socketHandlerStateStream.listen(onSocketStateChange);
     channel.connect();
   }
 
@@ -83,21 +70,20 @@ class MyAppState extends State<MyApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('en', 'GB')],
+      supportedLocales: const [Locale('en')],
       onGenerateTitle: (BuildContext context) =>
           AppLocalizations.of(context)!.appTitle,
       restorationScopeId: 'app',
-      theme: createTheme(themeColor, Brightness.light),
-      darkTheme: createTheme(themeColor, Brightness.dark),
+      theme: ThemeManager.createTheme(Brightness.light),
+      darkTheme: ThemeManager.createTheme(Brightness.dark),
       home: StreamBuilder(
           stream: channel.incomingMessagesStream,
           builder: (context, messageSnapshot) {
             return Consumer<AppModel>(
                 builder: (BuildContext context, AppModel model, Widget? child) {
-              bool isConnected = _socketStatus == SocketStatus.connected;
-              model.isConnected = isConnected;
-              model.items = parseVessels(messageSnapshot.data);
-              return const ItemMainView();
+              model.isConnected = socketStatus == SocketStatus.connected;
+              model.vessels = parseVessels(messageSnapshot.data);
+              return const MainView();
             });
           }),
     );

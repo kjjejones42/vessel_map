@@ -14,6 +14,15 @@
   "warningTitle": "Warning",
   "editTitle": "Edit Vessel Details",
   "createTitle": "Add New Vessel",
+  "connected": "Connected",
+  "disconnected": "Disconnected",
+  "fieldRequired": "Field required.",
+  "doubleValidation": "Please enter a valid number",
+  "latitudeValidation": "Please enter a valid latitude",
+  "longitudeValidation": "Please enter a valid longitude",
+  "formNameTooltip": "Vessel Name",
+  "formLatitudeTooltip": "Latitude",
+  "formLongitudeTooltip": "Longitude",
   "deletePrompt": "This will delete all data for \"{name}\". Do you want to proceed?",
   "@deletePrompt": {
       "placeholders": {
@@ -41,13 +50,19 @@
         }
       }
   },
-  "connected": "Connected",
-  "disconnected": "Disconnected",
-  "fieldRequired": "Field required.",
-  "doubleValidation": "Please enter a valid number",
-  "latitudeValidation": "Please enter a valid latitude",
-  "longitudeValidation": "Please enter a valid longitude",
-  "formNameTooltip": "Vessel Name",
-  "formLatitudeTooltip": "Latitude",
-  "formLongitudeTooltip": "Longitude"
+  "httpErrorMessage": "Error {statusCode} - {uri} - {reason}",
+  "@httpErrorMessage": {
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      },
+      "uri": {
+        "type": "Uri"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  }
 }
+

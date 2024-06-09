@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:vessel_map/src/feature/api_request_manager.dart';
-import 'package:vessel_map/src/feature/item_details_form.dart';
+import 'package:vessel_map/src/managers/api_request_manager.dart';
+import 'package:vessel_map/src/widgets/vessel_details_form.dart';
 
-class AddItemButton extends StatelessWidget {
-  const AddItemButton({super.key});
+class AddButton extends StatelessWidget {
+  const AddButton({super.key});
 
   void onSubmitCreateVessel(
       Map<String, dynamic> payload, BuildContext? context) async {
-    await ApiRequestManager().create(payload);
+    await ApiRequestManager(context: context).post(payload);
     if (context != null && context.mounted) {
       Navigator.pop(context);
     }
@@ -23,7 +23,7 @@ class AddItemButton extends StatelessWidget {
           child: AlertDialog.adaptive(
         title: Text(localizations!.createTitle),
         content:
-            ItemDetailsForm(formKey: formKey, onSubmit: onSubmitCreateVessel),
+            VesselDetailsForm(formKey: formKey, onSubmit: onSubmitCreateVessel),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
