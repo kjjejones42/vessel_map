@@ -4,7 +4,7 @@ The most reliable method of building the app is with Docker, however this can be
 
 ## Docker Build Instructions
 
-Use `docker compose up --build` to build and run the project with a single command.
+Use `docker compose up --build` to build and run the project.
 
 If this doesn't work try:
 
