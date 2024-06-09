@@ -1,9 +1,8 @@
-FROM fischerscode/flutter:latest as Frontend
+FROM fischerscode/flutter:master as Frontend
 USER root
 COPY ./frontend .
 RUN git config --global --add safe.directory /home/flutter/flutter-sdk
-ARG APIKEY
-RUN flutter build web --dart-define APIKEY=${APIKEY}
+RUN --mount=type=secret,id=apikey apikey=$(cat /run/secrets/apikey) && flutter build web --release --dart-define APIKEY=$apikey
 
 FROM node:alpine
 WORKDIR /app

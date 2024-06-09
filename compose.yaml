@@ -4,11 +4,13 @@ services:
       - "${PORT}:3000"
     build:
       context: .
-      args:
-        PORT: ${PORT}
-        APIKEY: ${APIKEY}
+      secrets:
+        - apikey
     volumes:
       - database:/app/db
 volumes:
   database:
+secrets:
+    apikey:
+        environment: APIKEY
   
