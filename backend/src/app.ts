@@ -2,7 +2,7 @@ import cors from "cors"
 import express from "express"
 
 import VesselRepository from "./repository"
-import { IVessel } from "./db"
+import { IVessel, validateVessel } from "./db"
 
 export default function initialiseApp(repo: VesselRepository) {
 
@@ -21,7 +21,9 @@ export default function initialiseApp(repo: VesselRepository) {
   // Add new vessel details on POST request
   app.post('/api', async (req, res) => {
     try {
-      const status = await repo.create(req.body as IVessel)
+      const vessel = req.body as IVessel;
+      validateVessel(vessel)
+      const status = await repo.create(vessel)
       res.status(201).json(status)
     } catch (error) {
       res.status(400).json(error)
@@ -32,7 +34,9 @@ export default function initialiseApp(repo: VesselRepository) {
   // Update vessel details on PATCH request
   app.patch('/api', async (req, res) => {
     try {
-      const status = await repo.update(req.body as IVessel)
+      const vessel = req.body as IVessel;
+      validateVessel(vessel)
+      const status = await repo.update(vessel)
       res.json(status)
     } catch (error) {
       res.status(400).json(error)

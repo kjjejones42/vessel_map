@@ -1,3 +1,4 @@
+import assert, { AssertionError } from 'assert';
 import { Database } from 'sqlite3'
 
 export interface IVessel {
@@ -6,6 +7,21 @@ export interface IVessel {
   latitude: number,
   longitude: number,
   updated_at?: string
+}
+
+/**
+ * Assert that the passed object implements the IVessel interface.
+ */
+export function validateVessel(vessel: any) {
+  try {
+    assert('name' in vessel && typeof vessel.name == "string");
+    assert('latitude' in vessel && typeof vessel.latitude == "number");
+    assert('longitude' in vessel && typeof vessel.latitude == "number");
+    assert('id' in vessel ? typeof vessel.id == 'number' : true)
+    assert('updated_at' in vessel ? typeof vessel.updated_at == 'string' : true)
+  } catch (e) {
+    throw new TypeError(`${JSON.stringify(vessel)} is not a valid vessel type.`)
+  }
 }
 
 export const initDatabase = async (filename: string) => {
