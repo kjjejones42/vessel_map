@@ -6,11 +6,6 @@
 app = 'vesselmap'
 primary_region = 'lhr'
 
-[build]
-
-[build.args]
-  APIKEY = 'AIzaSyDkeC25-PriLgFpQ4bprKzy9a9Hh9zjaWg'
-
 [mounts]
   source="data"
   destination="/app/db"
