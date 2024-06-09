@@ -1,8 +1,5 @@
 {
   "appTitle": "Vessel Map",
-  "@appTitle": {
-    "description": "The title of the application"
-  },
   "noResults": "No vessels currently listed",
   "disconnectedMessage": "Can't connect at the moment. Trying again...",
   "ok": "OK",
@@ -19,19 +16,30 @@
   "createTitle": "Add New Vessel",
   "deletePrompt": "This will delete all data for \"{name}\". Do you want to proceed?",
   "@deletePrompt": {
-    "name": {
       "placeholders": {
-        "type": "String"
+        "name": {
+          "type": "String"
+        }
       }
-    }
   },
   "searchText": "Showing results for \"{searchTerm}\"",
   "@searchText": {
-    "name": {
       "placeholders": {
-        "searchTerm": "String"
+        "searchTerm": {
+          "type": "String"
+        }
       }
-    }
+  },
+  "listTileText": "Updated: {lastUpdated}\nLocation: {locationText}",
+  "@listTileText": {
+      "placeholders": {
+        "lastUpdated": {
+          "type": "String"
+        },
+        "locationText": {
+          "type": "String"
+        }
+      }
   },
   "connected": "Connected",
   "disconnected": "Disconnected",
