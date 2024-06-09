@@ -1,94 +1,130 @@
-import { RunResult } from "sqlite3"
-import { IVessel, db } from "./db"
+import { Database } from "sqlite3";
 
-export class UserRepository {
+import { IVessel } from "./db"
 
-  _listeners: ((x: IVessel[]) => void)[] = []
+export default class VesselRepository {
 
-  addListener(func: ((x: IVessel[]) => void)) {
-    this._listeners.push(func)
+  db: Database;
+
+  constructor(db: Database) {
+    this.db = db;
   }
 
-  _notifyListeners() {
+  /** 
+  * List of listeners to notify whenever database is updated
+  */
+  listeners: ((_: IVessel[]) => void)[] = []
+
+  addListener(listener: ((x: IVessel[]) => void)) {
+    this.listeners.push(listener)
+  }
+
+  async closeDatabase() {
+    this.db.close();
+  }
+
+  notifyListeners() {
     this.findAll().then(data => {
-      this._listeners.forEach(func => func(data))
+      this.listeners.forEach(listener => listener(data))
     })
   }
 
-  findAll(): Promise<IVessel[]> {
+  /**
+   * @returns All vessel rows in database
+   */
+  async findAll(): Promise<IVessel[]> {
     return new Promise((resolve, reject) => {
-      db.all("SELECT * FROM vessels", (err, res) => {
-        if (err) reject(err)
-        else resolve(res as IVessel[])
+      this.db.all("SELECT * FROM vessels", (error, response) => {
+        error ? reject(error) : resolve(response as IVessel[])
       })
     })
   }
 
-  findById(userId: number): Promise<IVessel | undefined> {
+  /**
+   * @returns The vessel row with the supplied id
+   */
+  async findById(id: number): Promise<IVessel | undefined> {
     return new Promise((resolve, reject) => {
-      db.get(
+      this.db.get(
         "SELECT * FROM vessels WHERE id = ?",
-        [userId],
-        (err, res) => {
-          if (err) reject(err)
-          else resolve(res as IVessel)
+        [id],
+        (error, response) => {
+          error ? reject(error) : resolve(response as IVessel)
         }
       )
     })
   }
 
-  create(vessel: IVessel): Promise<IVessel> {
+  /**
+   * @returns The created vessel's database ID
+   */
+  async create(vessel: IVessel): Promise<number> {
     return new Promise((resolve, reject) => {
-      const outerThis = this;
-      db.run(
+      const repo = this;
+      const date = vessel.updated_at || new Date().toISOString()
+      this.db.run(
         "INSERT INTO vessels (id, name, latitude, longitude, updated_at) VALUES(?,?,?,?,?)",
-        [null, vessel.name, vessel.latitude, vessel.longitude, new Date().toISOString()],
-        function (err) {
-          if (err) reject(err)
-          else {
-            outerThis.findById(this.lastID)
-              .then(user => resolve(user!))
-              .then(() => outerThis._notifyListeners())
-              .catch(reject)
+        [null, vessel.name, vessel.latitude, vessel.longitude, date],
+        function (error) {
+          if (error) {
+            reject(error)
+          } else {
+            repo.notifyListeners()
+            resolve(this.lastID)
           }
         }
       )
     })
   }
-
-  update(vessel: IVessel): Promise<IVessel | undefined> {
+  /**
+   * Updates the vessel with the supplied ID and details.
+   * @returns The updated vessel details
+   */
+  async update(vessel: IVessel): Promise<IVessel | undefined> {
     return new Promise((resolve, reject) => {
-      const outerThis = this;
-      db.run(
+      this.db.run(
         "UPDATE vessels SET name = ?, latitude = ?, longitude = ?, updated_at = ? WHERE id = ?",
         [vessel.name, vessel.latitude, vessel.longitude, new Date().toISOString(), vessel.id],
-        function (err) {
+        err => {
           if (err) reject(err)
           else {
-            outerThis.findById(this.lastID)
-              .then(resolve)
-              .then(() => outerThis._notifyListeners())
-              .catch(reject)
+            this.notifyListeners()
+            this.findById(vessel.id!).then(resolve).catch(reject)
           }
         }
       )
     })
   }
 
-  remove(userId: number): Promise<number> {
+  /**
+   * Removes the vessel with the supplied ID
+   * @returns 
+   */
+  async remove(id: number): Promise<void> {
     return new Promise((resolve, reject) => {
-      const outerThis = this;
-      db.all(
+      this.db.all(
         "DELETE FROM vessels WHERE id = ?",
-        [userId],
-        function (err, res) {
-          if (err) reject(err)
-          else {
-            resolve(res.length)
-            outerThis._notifyListeners()
+        [id],
+        err => {
+          if (err) {
+            reject(err)
+          } else {
+            this.notifyListeners()
+            resolve()
           }
         }
       )
     })
+  }
+
+  /**
+   * Delete all vessels in database. This should only be used in testing.
+   */
+  async deleteAll() {
+    return new Promise<void>((res, rej) => {
+      this.db.run('DELETE FROM vessels', err =>
+        err ? rej(err) : res())
+    })
+
   }
 }
