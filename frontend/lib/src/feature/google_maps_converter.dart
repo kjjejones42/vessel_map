@@ -6,7 +6,7 @@ class GoogleMapsMarkerConverter {
 
   GoogleMapsMarkerConverter([this.icon = BitmapDescriptor.defaultMarker]);
 
-  Marker convert(Vessel item, [Function? onTap]) {
+  Marker convert(Vessel item) {
     return Marker(
       markerId: item.markerId,
       position: item.location,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ApiRequestManager {
@@ -7,7 +8,7 @@ class ApiRequestManager {
     'Content-Type': 'application/json'
   };
 
-  static final int port = Uri.base.port;
+  static final int port = kReleaseMode ? Uri.base.port : 3000;
 
   static final Uri _endpoint = Uri(
       scheme: Uri.base.scheme, host: Uri.base.host, port: port, path: '/api');

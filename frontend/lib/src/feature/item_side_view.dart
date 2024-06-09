@@ -1,34 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
-import 'package:vessel_map/src/feature/api_request_manager.dart';
+import 'package:vessel_map/src/feature/add_item_button.dart';
+import 'package:vessel_map/src/feature/search_text_bar.dart';
+import 'package:vessel_map/src/feature/sort_items_button.dart';
 import 'package:vessel_map/src/feature/vessel.dart';
-import 'package:vessel_map/src/feature/item_details_form.dart';
 import 'package:vessel_map/src/feature/list_entry_builder.dart';
 import 'package:vessel_map/src/feature/app_model.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ItemSideView extends StatefulWidget {
   final bool showMenuButton;
-
   const ItemSideView({super.key, this.showMenuButton = false});
 
   @override
   State<StatefulWidget> createState() => ItemSideViewState();
 }
 
-enum VesselSortKeys {
-  created,
-  name,
-  updated,
-}
-
 class ItemSideViewState extends State<ItemSideView> {
-  String _textValue = '';
   String _searchTerm = '';
   VesselSortKeys _currentSortFunc = VesselSortKeys.created;
-  List<Vessel> _filteredItems = [];
   final TextEditingController _textController = TextEditingController();
 
   static final Map<VesselSortKeys, int Function(Vessel, Vessel)> _sortFuncs = {
@@ -39,19 +29,22 @@ class ItemSideViewState extends State<ItemSideView> {
 
   AppLocalizations? localizations;
 
-  void _setFilter(List<Vessel> items) {
-    _searchTerm = _textValue.toLowerCase();
-    final filteredItems = _filterItems(items);
+  void _setFilter(String value) {
     setState(() {
-      _filteredItems = filteredItems;
+      _searchTerm = value.toLowerCase();
     });
   }
 
-  void _sortItems(List<Vessel> items, VesselSortKeys value) {
-    _currentSortFunc = value;
-    final filteredItems = _filterItems(items);
+  void _sortItems(VesselSortKeys value) {
     setState(() {
-      _filteredItems = filteredItems;
+      _currentSortFunc = value;
+    });
+  }
+
+  void _clearFilter() {
+    setState(() {
+      _textController.clear();
+      _searchTerm = '';
     });
   }
 
@@ -63,130 +56,87 @@ class ItemSideViewState extends State<ItemSideView> {
     return filteredItems;
   }
 
-  void _clearFilter(List<Vessel> items) {
-    _textController.clear();
-    _textValue = '';
-    _searchTerm = '';
-    final filteredItems = _filterItems(items);
-    setState(() {
-      _filteredItems = filteredItems;
-    });
-  }
-
-  void onSubmitCreateVessel(
-      Map<String, dynamic> payload, BuildContext? context) async {
-    await ApiRequestManager().create(payload);
-    if (context != null && context.mounted) {
-      Navigator.pop(context);
-    }
-  }
-
-  void addNew() {
-    final formKey = GlobalKey<FormState>();
-    showDialog(
-      context: context,
-      builder: (context) => PointerInterceptor(
-          child: AlertDialog.adaptive(
-        title: Text(localizations!.createTitle),
-        content:
-            ItemDetailsForm(formKey: formKey, onSubmit: onSubmitCreateVessel),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(localizations!.cancel)),
-          TextButton(
-              onPressed: () => formKey.currentState!.save(),
-              child: Text(localizations!.submit)),
-        ],
-      )),
-    );
-  }
-
-  Widget searchTextChip(List<Vessel> items) => Padding(
+  Widget searchTextChip() => Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: InputChip(
         label: Text(localizations!.searchText(_searchTerm)),
         deleteButtonTooltipMessage: localizations!.clear,
-        onDeleted: () => _clearFilter(items),
+        onDeleted: _clearFilter,
       ));
 
-  Widget menuButton() => Padding(
-      padding: const EdgeInsets.all(8),
-      child: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.menu)));
+  Widget nonDrawerSearchBar() => Flexible(
+      flex: 0,
+      child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              Expanded(
+                  child: SearchTextBar(
+                      textController: _textController, onSubmit: _setFilter)),
+              Flexible(
+                  flex: 0,
+                  child: Row(children: [
+                    const AddItemButton(),
+                    SortItemsButton(onChange: _sortItems)
+                  ]))
+            ],
+          )));
 
-  Widget searchTextBar(List<Vessel> items) => TextField(
-        controller: _textController,
-        onChanged: (value) => setState(() => _textValue = value),
-        onSubmitted: (value) => _setFilter(items),
-        decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            labelText: localizations!.search,
-            suffixIcon: IconButton(
-              tooltip: localizations!.search,
-              icon: const Icon(Icons.search),
-              onPressed: () => _setFilter(items),
+  Widget drawerSearchBar() => Flexible(
+      flex: 0,
+      child: Column(children: [
+        Padding(
+            padding: const EdgeInsets.all(4),
+            child: Row(
+              children: [
+                Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.menu))),
+                Expanded(child: Container()),
+                Row(children: [
+                  const AddItemButton(),
+                  SortItemsButton(onChange: _sortItems)
+                ])
+              ],
             )),
-      );
-
-  Widget addButton() => Padding(
-      padding: const EdgeInsets.all(8),
-      child: IconButton(
-          onPressed: addNew,
-          icon: const Icon(Icons.add),
-          tooltip: localizations!.addTooltip));
-
-  Widget sortMenuButton(List<Vessel> items) => Padding(
-      padding: const EdgeInsets.all(8),
-      child: PopupMenuButton(
-          onSelected: (key) => _sortItems(items, key as VesselSortKeys),
-          tooltip: localizations!.sortTooltip,
-          icon: const Icon(Icons.sort),
-          itemBuilder: (context) =>
-              VesselSortKeys.values.map<PopupMenuItem>((key) {
-                final name = toBeginningOfSentenceCase(key.name);
-                return PopupMenuItem(value: key, child: Text(name));
-              }).toList()));
+        Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                Expanded(
+                    child: SearchTextBar(
+                        textController: _textController, onSubmit: _setFilter)),
+              ],
+            ))
+      ]));
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AppModel>(
         builder: (BuildContext context, AppModel model, Widget? child) {
-      final items = model.items;
-      _filteredItems = _filterItems(items);
+      final filteredItems = _filterItems(model.items);
       localizations = AppLocalizations.of(context);
       return Column(children: [
-        Flexible(
-            flex: 0,
-            child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: Row(
-                  children: [
-                    widget.showMenuButton
-                        ? menuButton()
-                        : const SizedBox.shrink(),
-                    Expanded(child: searchTextBar(items)),
-                    addButton(),
-                    sortMenuButton(items)
-                  ],
-                ))),
-        (_searchTerm != '') ? searchTextChip(items) : const SizedBox.shrink(),
+        (widget.showMenuButton) ? drawerSearchBar() : nonDrawerSearchBar(),
+        (_searchTerm != '') ? searchTextChip() : const SizedBox.shrink(),
         Expanded(
-            child: ListView.builder(
-                restorationId: 'sampleItemListView',
-                itemCount: _filteredItems.length,
-                padding: EdgeInsets.zero,
-                itemBuilder:
-                    ListEntryBuilder(items: _filteredItems).itemBuilder))
+            child: filteredItems.isEmpty
+                ? Text(localizations!.noResults)
+                : ListView.builder(
+                    restorationId: 'vesselListView',
+                    itemCount: filteredItems.length,
+                    padding: EdgeInsets.zero,
+                    itemBuilder:
+                        ListEntryBuilder(items: filteredItems).itemBuilder))
       ]);
     });
   }
 
   @override
   void dispose() {
-    _textController.dispose();
     super.dispose();
+    _textController.dispose();
   }
 }

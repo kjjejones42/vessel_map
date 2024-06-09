@@ -77,35 +77,27 @@ class ListEntryBuilder {
             ));
   }
 
-  String circleAvatarText(String name) {
-    return switch (name.length) {
-      0 => '',
-      1 => name[0].toUpperCase(),
-      _ => name[0].toUpperCase() + name[1].toLowerCase()
-    };
-  }
-
   Widget? itemBuilder(BuildContext context, int index) {
     return Consumer<AppModel>(builder: (context, model, child) {
       localizations = AppLocalizations.of(context);
       final item = items[index];
       final lastUpdated = DateFormat.yMd(locale).add_jms().format(item.updated);
+      final leading = Row(mainAxisSize: MainAxisSize.min, children: [
+        IconButton(
+            tooltip: localizations!.delete,
+            onPressed: () => onDeleteClick(context, item),
+            icon: const Icon(Icons.delete)),
+        IconButton(
+            tooltip: localizations!.edit,
+            onPressed: () => onEditClick(context, item),
+            icon: const Icon(Icons.edit)),
+      ]);
       return ListTile(
           key: Key(item.hashCode.toString()),
           title: Text(item.name),
           subtitle:
               Text('Updated: $lastUpdated\nLocation: ${item.locationText}'),
-          leading: CircleAvatar(child: Text(circleAvatarText(item.name))),
-          trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-            IconButton(
-                tooltip: localizations!.edit,
-                onPressed: () => onEditClick(context, item),
-                icon: const Icon(Icons.edit)),
-            IconButton(
-                tooltip: localizations!.delete,
-                onPressed: () => onDeleteClick(context, item),
-                icon: const Icon(Icons.delete))
-          ]),
+          leading: leading,
           onTap: () {
             final mapController = model.mapController;
             if (mapController != null) {
