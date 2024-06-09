@@ -78,7 +78,7 @@
           script.async = true;
           document.head.appendChild(script);
         },
-        { once: true }
+        { once: true, passive: true }
       );
     </script>
     <script src="flutter_bootstrap.js" async></script>
