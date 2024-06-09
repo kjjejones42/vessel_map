@@ -3,8 +3,7 @@ USER root
 COPY ./frontend .
 RUN git config --global --add safe.directory /home/flutter/flutter-sdk
 ARG APIKEY
-ARG PORT
-RUN flutter build web --dart-define PORT=${PORT} --dart-define APIKEY=${APIKEY}
+RUN flutter build web --dart-define APIKEY=${APIKEY}
 
 FROM node:alpine
 WORKDIR /app
