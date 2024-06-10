@@ -5,6 +5,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vessel_map/src/models/vessel.dart';
 
+/// Models the overall state of the app and notifies listeners on change to trigger
+/// UI update.
 class AppModel extends ChangeNotifier {
   bool _isConnected = false;
 

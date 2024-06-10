@@ -18,6 +18,7 @@ class Vessel {
         json['id'] as int,
         json['name'] as String,
         LatLng(json['latitude'] as double, json['longitude'] as double),
+        // Convert UTC database date to local datetime display.
         DateTime.parse(json['updated_at']).toLocal());
   }
 
@@ -31,8 +32,8 @@ class Vessel {
     );
   }
 
-  /// Overriden hashcode implementation ensures vessel equality is calculated from
-  /// properties and not identity. This is important when the app needs to determine
+  /// Overridden hashcode implementation ensures vessel equality is calculated from
+  /// properties and not object identity. This is important when the app needs to determine
   /// whether to update the UI.
   @override
   int get hashCode => Object.hash(id, name, location, updated);

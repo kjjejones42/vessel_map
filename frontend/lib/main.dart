@@ -7,8 +7,7 @@ import 'package:universal_html/html.dart' as html;
 import 'src/app.dart';
 
 void initialiseApp() async {
-  runApp(
-      ChangeNotifierProvider(create: (_) => AppModel(), child: const MyApp()));
+  runApp(ChangeNotifierProvider(create: (_) => AppModel(), child: const App()));
 }
 
 void main() async {

@@ -21,7 +21,8 @@ class GoogleMapsContainerState extends State<GoogleMapsContainer> {
   /// Fetch the custom map marker image from assets, then trigger rerender.
   void fetchIcon() async {
     var icon = await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(size: Size(50, 50)),
+        // Image from www.flaticon.com/free-icon/boat_15521851, created by Yumminky.
+        const ImageConfiguration(),
         'assets/images/boat_marker.png');
     setState(() {
       this.icon = icon;

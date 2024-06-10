@@ -3,6 +3,8 @@ import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:vessel_map/src/models/vessel.dart';
 
+/// Form which allows the user to enter / edit vessel details. This is reused for
+/// both the Edit and Delete dialog boxes.
 class VesselDetailsForm extends StatefulWidget {
   /// If specified, the form's default input values are set to the vessel properties.
   final Vessel? vessel;

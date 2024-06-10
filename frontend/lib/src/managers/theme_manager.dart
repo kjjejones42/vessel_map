@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+/// Creates the app theme, both light and dark.
 class ThemeManager {
-  static const Color themeColor = Colors.blue;
+  static const Color themeColor = Color.fromARGB(255, 33, 150, 243);
 
   static ThemeData createTheme(Brightness brightness) {
     ColorScheme colorScheme =

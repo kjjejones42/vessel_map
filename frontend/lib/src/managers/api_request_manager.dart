@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart';
 
+/// Manages all requests to the web API, and the Websocket Uri. Also allows for
+/// client to be set to allow for mocking in testing.
 class ApiRequestManager {
   static const Map<String, String> headers = {
     'Content-Type': 'application/json'

@@ -12,14 +12,14 @@ import 'package:vessel_map/src/models/vessel.dart';
 import 'package:vessel_map/src/widgets/main_view.dart';
 import 'package:websocket_universal/websocket_universal.dart';
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class App extends StatefulWidget {
+  const App({super.key});
 
   @override
-  State<MyApp> createState() => MyAppState();
+  State<App> createState() => AppState();
 }
 
-class MyAppState extends State<MyApp> {
+class AppState extends State<App> {
   /// WebSocket channel to receive real-time data.
   var channel = IWebSocketHandler.createClient(
       ApiRequestManager.websocketUri.toString(), SocketSimpleTextProcessor());

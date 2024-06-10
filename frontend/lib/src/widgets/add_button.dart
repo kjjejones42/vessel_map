@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:vessel_map/src/managers/api_request_manager.dart';
 import 'package:vessel_map/src/widgets/vessel_details_form.dart';
 
+/// Button to create dialog to add new vessel.
 class AddButton extends StatelessWidget {
   const AddButton({super.key});
 
