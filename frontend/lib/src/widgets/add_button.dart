@@ -42,6 +42,6 @@ class AddButton extends StatelessWidget {
         child: IconButton(
             onPressed: () => addNew(context, localizations),
             icon: const Icon(Icons.add),
-            tooltip: localizations!.addTooltip));
+            tooltip: localizations?.addTooltip));
   }
 }

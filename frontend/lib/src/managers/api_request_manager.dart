@@ -24,8 +24,11 @@ class ApiRequestManager {
       path: '/api');
 
   BuildContext? context;
+  late http.Client client;
 
-  ApiRequestManager({required this.context});
+  ApiRequestManager({required this.context, http.Client? client}) {
+    this.client = client ?? http.Client();
+  }
 
   /// Displays the error to the user as a snackbar.
   void _showError(BuildContext context, Response response) {
@@ -58,16 +61,16 @@ class ApiRequestManager {
 
   /// Execute a post request to the server.
   Future<String?> post(Map<String, dynamic> payload) async {
-    return _call(http.post, payload);
+    return _call(client.post, payload);
   }
 
   /// Execute a delete request to the server.
   Future<String?> delete(int id) async {
-    return _call(http.delete, {'id': id});
+    return _call(client.delete, {'id': id});
   }
 
   /// Execute a patch request to the server.
   Future<String?> patch(Map<String, dynamic> payload) async {
-    return _call(http.patch, payload);
+    return _call(client.patch, payload);
   }
 }

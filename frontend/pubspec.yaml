@@ -19,6 +19,7 @@ dependencies:
   http: ^1.2.1
   intl: any
   loading_animation_widget: ^1.2.1
+  mocktail: ^1.0.3
   pointer_interceptor: ^0.10.1+1
   provider: ^6.1.2
   universal_html: ^2.2.4
@@ -29,6 +30,7 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^4.0.0
+  build_runner: ^2.4.11
 
 flutter:
   uses-material-design: true
