@@ -20,7 +20,7 @@ If you have the Flutter SDL installed locally then run the following commands fr
 
 ```
 $ cd frontend
-$ flutter build web --dart-define APIKEY=$APIKEY
+$ flutter build web --dart-define apikey=$APIKEY
 $ cd ../backend
 $ mkdir public
 $ cp -r -f ../frontend/build/web/* public
